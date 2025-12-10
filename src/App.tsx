@@ -45,43 +45,37 @@ function App() {
               const pdf = await pdfjs.getDocument({ data: typedArray, password }).promise;
               let text = '';
               const textItems: TextItem[] = [];
-              
-              // Only process pages 4 and 5 (1-indexed, so pages 4 and 5)
-              const pagesToProcess = [4, 5];
-              
-              for (const pageNum of pagesToProcess) {
-                // Check if page exists
-                if (pageNum > pdf.numPages) {
-                  continue;
-                }
-                
+
+              // Process all pages in the PDF
+              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                 const page = await pdf.getPage(pageNum);
                 const textContent = await page.getTextContent();
-                
+
                 textContent.items.forEach((item: any) => {
                   text += item.str + ' ';
-                  
+
                   // Extract position from transform matrix
                   // Transform matrix: [a, b, c, d, e, f] where e=x, f=y
                   const transform = item.transform || [1, 0, 0, 1, 0, 0];
                   const x = transform[4] || 0;
                   const y = transform[5] || 0;
-                  
+
                   textItems.push({
                     str: item.str,
                     x,
-                    y
+                    y,
+                    page: pageNum // Include page number
                   });
                 });
                 text += '\n';
               }
-              
+
               setExtractedText(text);
-              
+
               // Parse transaction table using position data
               const transactions = parseTransactionTable(textItems);
               setTransactionRows(transactions);
-              
+
               // Fallback to old parsing if no table found
               if (transactions.length === 0) {
                 setExpenses(parseExpenses(text));

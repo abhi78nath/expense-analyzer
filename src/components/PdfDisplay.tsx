@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Expense, TransactionRow } from '../utils/textParser';
+import { exportToJson } from '../utils/exportJson';
 
 interface PdfDisplayProps {
   extractedText: string;
@@ -17,6 +18,12 @@ const PdfDisplay: React.FC<PdfDisplayProps> = ({ extractedText, expenses, transa
   const formatNumber = (value: number | null): string => {
     if (value === null) return '-';
     return value.toFixed(2);
+  };
+
+  const handleExportJson = () => {
+    if (transactionRows.length > 0) {
+      exportToJson(transactionRows, 'transactions.json');
+    }
   };
 
   return (
@@ -54,6 +61,22 @@ const PdfDisplay: React.FC<PdfDisplayProps> = ({ extractedText, expenses, transa
               ))}
             </tbody>
           </table>
+          <button
+            onClick={handleExportJson}
+            className="export-json-btn"
+            style={{
+              marginTop: '10px',
+              padding: '10px 20px',
+              backgroundColor: '#ff6b35',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            Export to JSON
+          </button>
         </div>
       ) : expenses.length > 0 ? (
         <div>
