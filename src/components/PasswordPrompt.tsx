@@ -5,7 +5,7 @@ interface PasswordPromptProps {
 }
 
 const PasswordPrompt: React.FC<PasswordPromptProps> = ({ onSubmit }) => {
-  const [password, setPassword] = useState('52040070800');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

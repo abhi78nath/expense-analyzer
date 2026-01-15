@@ -35,12 +35,30 @@ function App() {
     if (!selectedFile) return;
 
     setIsParsing(true);
-    setExtractedText(password ? 'Analysing with password...' : 'Analysing with Python API...');
+    setExtractedText(password ? 'Analysing with password...' : 'Checking PDF protection...');
     setExpenses([]);
     setTransactionRows([]);
-    setNeedsPassword(false);
 
     try {
+      // Proactive check: Try to open the PDF with pdf.js to detect encryption
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const loadingTask = pdfjs.getDocument({ data: arrayBuffer, password });
+
+      try {
+        await loadingTask.promise;
+      } catch (pdfError: any) {
+        if (pdfError.name === 'PasswordException' || (pdfError.message && pdfError.message.toLowerCase().includes('password'))) {
+          setNeedsPassword(true);
+          setExtractedText('This PDF is password protected. Please provide the password.');
+          setIsParsing(false);
+          return;
+        }
+        throw pdfError;
+      }
+
+      setNeedsPassword(false);
+      setExtractedText('PDF unlocked. Analysing with Python API...');
+
       const response = await parsePdfWithPython(selectedFile, password);
 
       // Map the structured Python API response to our internal TransactionRow format
@@ -60,11 +78,11 @@ function App() {
         setExtractedText('No transactions found in the PDF.');
       }
     } catch (error: any) {
-      console.error('Error parsing with Python API:', error);
+      console.error('Error parsing PDF:', error);
 
       if (error.message.includes('401') || error.message.toLowerCase().includes('password')) {
         setNeedsPassword(true);
-        setExtractedText('This PDF is password protected. Please provide the password.');
+        setExtractedText('Password failed. Please try again.');
       } else {
         setExtractedText(`Error: ${error.message || 'Failed to parse PDF.'}`);
       }
