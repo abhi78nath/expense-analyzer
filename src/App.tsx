@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import './App.css';
 import { pdfjs } from 'react-pdf';
-import FileUpload from './components/FileUpload';
+import UploadScreen from './components/upload/UploadScreen';
 import PdfDisplay from './components/PdfDisplay';
-import PasswordPrompt from './components/PasswordPrompt';
 import { parsePdfWithPython } from './utils/api';
 import type { TransactionRow, Expense } from './utils/textParser';
 
@@ -12,56 +11,44 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState<string>('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [transactionRows, setTransactionRows] = useState<TransactionRow[]>([]);
   const [isParsing, setIsParsing] = useState<boolean>(false);
-  const [needsPassword, setNeedsPassword] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [hasResults, setHasResults] = useState<boolean>(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setSelectedFile(event.target.files[0]);
-      setExtractedText('');
-      setExpenses([]);
-      setTransactionRows([]);
-      setNeedsPassword(false);
-    }
-  };
-
-  const handleParse = async (password?: string) => {
-    if (!selectedFile) return;
-
+  const handleAnalyze = async (file: File, password?: string) => {
     setIsParsing(true);
+    setErrorMessage('');
     setExtractedText(password ? 'Analysing with password...' : 'Checking PDF protection...');
     setExpenses([]);
     setTransactionRows([]);
 
     try {
-      // Proactive check: Try to open the PDF with pdf.js to detect encryption
-      const arrayBuffer = await selectedFile.arrayBuffer();
+      // Proactive check: detect encryption via pdf.js
+      const arrayBuffer = await file.arrayBuffer();
       const loadingTask = pdfjs.getDocument({ data: arrayBuffer, password });
 
       try {
         await loadingTask.promise;
       } catch (pdfError: any) {
-        if (pdfError.name === 'PasswordException' || (pdfError.message && pdfError.message.toLowerCase().includes('password'))) {
-          setNeedsPassword(true);
-          setExtractedText('This PDF is password protected. Please provide the password.');
+        if (
+          pdfError.name === 'PasswordException' ||
+          (pdfError.message && pdfError.message.toLowerCase().includes('password'))
+        ) {
+          setErrorMessage('This PDF is password protected. Please provide the correct password.');
           setIsParsing(false);
           return;
         }
         throw pdfError;
       }
 
-      setNeedsPassword(false);
       setExtractedText('PDF unlocked. Analysing with Python API...');
 
-      const response = await parsePdfWithPython(selectedFile, password);
+      const response = await parsePdfWithPython(file, password);
 
-      // Map the structured Python API response to our internal TransactionRow format
       const rows: TransactionRow[] = response.transactions.map((t: any) => ({
         date: String(t["date"] || ""),
         transactionReference: String(t["transaction reference"] || ""),
@@ -73,6 +60,7 @@ function App() {
 
       setTransactionRows(rows);
       setExtractedText(`Successfully parsed ${rows.length} transactions.`);
+      setHasResults(true);
 
       if (rows.length === 0) {
         setExtractedText('No transactions found in the PDF.');
@@ -80,33 +68,47 @@ function App() {
     } catch (error: any) {
       console.error('Error parsing PDF:', error);
 
-      if (error.message.includes('401') || error.message.toLowerCase().includes('password')) {
-        setNeedsPassword(true);
-        setExtractedText('Password failed. Please try again.');
+      if (error.message?.includes('401') || error.message?.toLowerCase().includes('password')) {
+        setErrorMessage('Password failed. Please try again.');
       } else {
-        setExtractedText(`Error: ${error.message || 'Failed to parse PDF.'}`);
+        setErrorMessage(error.message || 'Failed to parse PDF.');
       }
     } finally {
       setIsParsing(false);
     }
   };
 
+  if (hasResults) {
+    return (
+      <div className="container">
+        <button
+          onClick={() => {
+            setHasResults(false);
+            setTransactionRows([]);
+            setExpenses([]);
+            setExtractedText('');
+            setErrorMessage('');
+          }}
+          className="mb-4 rounded-lg border border-[#334155] bg-[#1e293b] px-4 py-2 text-sm text-[#94a3b8] hover:bg-[#334155] transition-colors"
+        >
+          ← Upload another file
+        </button>
+        <PdfDisplay
+          extractedText={extractedText}
+          expenses={expenses}
+          transactionRows={transactionRows}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="container">
-      <h1>Expense Analyser</h1>
-      <FileUpload
-        onFileChange={handleFileChange}
-        onParse={handleParse}
-        selectedFile={selectedFile}
-        isParsing={isParsing}
-      />
-      {needsPassword ? (
-        <PasswordPrompt onSubmit={handleParse} />
-      ) : (
-        <PdfDisplay extractedText={extractedText} expenses={expenses} transactionRows={transactionRows} />
-      )}
-    </div>
-  )
+    <UploadScreen
+      onAnalyze={handleAnalyze}
+      isLoading={isParsing}
+      errorMessage={errorMessage}
+    />
+  );
 }
 
-export default App
+export default App;
