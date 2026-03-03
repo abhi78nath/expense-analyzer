@@ -24,7 +24,7 @@ const AppLogo = () => {
             </h1>
 
             {/* Tagline */}
-            <p className="text-sm sm:text-base text-[#94a3b8]">
+            <p className="text-sm sm:text-base text-slate-400">
                 Upload your bank statement to get started
             </p>
         </div>

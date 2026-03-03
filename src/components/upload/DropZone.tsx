@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback } from "react";
 import { CloudUpload, FileText, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DropZoneProps {
     selectedFile: File | null;
@@ -63,8 +64,8 @@ const DropZone = ({ selectedFile, onFileSelect }: DropZoneProps) => {
         ${isDragActive
                     ? "border-emerald-500 bg-emerald-500/5 shadow-[inset_0_0_30px_rgba(16,185,129,0.06)]"
                     : selectedFile
-                        ? "border-emerald-500/40 bg-emerald-500/[0.03]"
-                        : "border-[#334155] bg-transparent hover:border-[#475569] hover:bg-white/[0.02]"
+                        ? "border-emerald-500/40 bg-emerald-500/3"
+                        : "border-slate-700 bg-transparent hover:border-slate-600 hover:bg-white/2"
                 }
       `}
         >
@@ -87,15 +88,17 @@ const DropZone = ({ selectedFile, onFileSelect }: DropZoneProps) => {
                         <span className="max-w-[200px] truncate text-sm font-medium text-white">
                             {selectedFile.name}
                         </span>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={handleRemoveFile}
-                            className="flex h-5 w-5 items-center justify-center rounded-full bg-[#334155] hover:bg-rose-500/20 transition-colors"
+                            className="h-6 w-6 rounded-full bg-slate-700 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
                             aria-label="Remove file"
                         >
-                            <X className="h-3 w-3 text-[#94a3b8] hover:text-rose-400" />
-                        </button>
+                            <X className="h-3 w-3" />
+                        </Button>
                     </div>
-                    <span className="text-xs text-[#94a3b8]">
+                    <span className="text-xs text-slate-400">
                         {(selectedFile.size / 1024).toFixed(1)} KB • Click to change file
                     </span>
                 </div>

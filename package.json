@@ -14,6 +14,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.576.0",
     "pdf-to-png-converter": "^3.11.0",
     "pdfjs-dist": "^5.4.296",
@@ -23,6 +24,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.71.2",
     "react-pdf": "^10.2.0",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1"
   },

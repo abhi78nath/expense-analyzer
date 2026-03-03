@@ -31,7 +31,7 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
 
                 {/* Glassmorphic Card */}
                 <div
-                    className="rounded-3xl border border-[#334155]/60 p-6 sm:p-8 shadow-2xl shadow-black/20"
+                    className="rounded-3xl border border-slate-700/60 p-6 sm:p-8 shadow-2xl shadow-black/20"
                     style={{
                         background: "rgba(30, 41, 59, 0.50)",
                         backdropFilter: "blur(24px)",
@@ -63,7 +63,7 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
                 </div>
 
                 {/* Security Note */}
-                <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-[#475569]">
+                <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-500">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     <span>Your data is processed securely</span>
                 </div>

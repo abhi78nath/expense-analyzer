@@ -2,9 +2,9 @@ import { useState } from 'react';
 import './App.css';
 import { pdfjs } from 'react-pdf';
 import UploadScreen from './components/upload/UploadScreen';
-import PdfDisplay from './components/PdfDisplay';
+import DashboardScreen from './components/dashboard/DashboardScreen';
 import { parsePdfWithPython } from './utils/api';
-import type { TransactionRow, Expense } from './utils/textParser';
+import type { TransactionRow } from './utils/textParser';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -12,8 +12,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 function App() {
-  const [extractedText, setExtractedText] = useState<string>('');
-  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [transactionRows, setTransactionRows] = useState<TransactionRow[]>([]);
   const [isParsing, setIsParsing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -22,8 +20,6 @@ function App() {
   const handleAnalyze = async (file: File, password?: string) => {
     setIsParsing(true);
     setErrorMessage('');
-    setExtractedText(password ? 'Analysing with password...' : 'Checking PDF protection...');
-    setExpenses([]);
     setTransactionRows([]);
 
     try {
@@ -45,8 +41,6 @@ function App() {
         throw pdfError;
       }
 
-      setExtractedText('PDF unlocked. Analysing with Python API...');
-
       const response = await parsePdfWithPython(file, password);
 
       const rows: TransactionRow[] = response.transactions.map((t: any) => ({
@@ -59,12 +53,7 @@ function App() {
       }));
 
       setTransactionRows(rows);
-      setExtractedText(`Successfully parsed ${rows.length} transactions.`);
       setHasResults(true);
-
-      if (rows.length === 0) {
-        setExtractedText('No transactions found in the PDF.');
-      }
     } catch (error: any) {
       console.error('Error parsing PDF:', error);
 
@@ -78,27 +67,18 @@ function App() {
     }
   };
 
+  const handleBackToUpload = () => {
+    setHasResults(false);
+    setTransactionRows([]);
+    setErrorMessage('');
+  };
+
   if (hasResults) {
     return (
-      <div className="container">
-        <button
-          onClick={() => {
-            setHasResults(false);
-            setTransactionRows([]);
-            setExpenses([]);
-            setExtractedText('');
-            setErrorMessage('');
-          }}
-          className="mb-4 rounded-lg border border-[#334155] bg-[#1e293b] px-4 py-2 text-sm text-[#94a3b8] hover:bg-[#334155] transition-colors"
-        >
-          ← Upload another file
-        </button>
-        <PdfDisplay
-          extractedText={extractedText}
-          expenses={expenses}
-          transactionRows={transactionRows}
-        />
-      </div>
+      <DashboardScreen
+        transactions={transactionRows}
+        onBackToUpload={handleBackToUpload}
+      />
     );
   }
 
