@@ -18,8 +18,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* Main content area */}
             <main
                 className={`
-          min-h-screen transition-all duration-300 ease-out
-          ${isOpen ? "lg:ml-60" : "lg:ml-0"}
+          min-h-screen transition-all duration-300 ease-in-out
+          ${isOpen ? "lg:ml-64" : "lg:ml-20"}
         `}
             >
                 {/* Mobile hamburger */}

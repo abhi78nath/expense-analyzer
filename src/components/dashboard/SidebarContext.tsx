@@ -20,9 +20,8 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const onResize = () => {
-            if (window.innerWidth >= 1024) {
-                setIsOpen(true);
-            } else {
+            // Only auto-close if moving TO mobile
+            if (window.innerWidth < 1024) {
                 setIsOpen(false);
             }
         };
