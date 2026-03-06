@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 interface AnalyzeButtonProps {
     disabled: boolean;
     isLoading: boolean;
-    onClick: () => void;
+    onClick?: () => void;
 }
 
 const AnalyzeButton = ({ disabled, isLoading, onClick }: AnalyzeButtonProps) => {
     return (
         <Button
+            type="submit"
             id="analyze-button"
             onClick={onClick}
             disabled={disabled || isLoading}

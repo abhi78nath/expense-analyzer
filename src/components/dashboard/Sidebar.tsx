@@ -6,11 +6,11 @@ import {
     Settings,
     HelpCircle,
     PanelLeft,
-    PanelRight,
     X,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const navItems = [
     { label: "Dashboard", icon: LayoutDashboard, active: true },
@@ -25,6 +25,7 @@ const bottomItems = [
 
 const Sidebar = () => {
     const { isOpen, toggle, close } = useSidebar();
+    const [hovered, setHovered] = useState(false);
     const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
     return (
@@ -53,14 +54,38 @@ const Sidebar = () => {
             >
                 {/* Top — Logo & Toggle */}
                 <div className={`flex items-center px-4 py-6 ${isOpen ? "justify-between" : "justify-center"}`}>
-                    <div className="flex items-center gap-3 overflow-hidden">
+                    <div
+                        onClick={!isOpen ? toggle : undefined}
+                        className={`
+                            group flex items-center gap-3 overflow-hidden
+                            ${!isOpen ? "cursor-pointer" : ""}
+                        `}
+                    >
                         <div
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-md shadow-emerald-500/20"
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-md shadow-emerald-500/20 transition-all duration-300 group-hover:bg-emerald-500/30"
                             style={{
-                                background: "linear-gradient(135deg, #10b981, #14b8a6)",
+                                background:
+                                    !isOpen && hovered
+                                        ? undefined
+                                        : "linear-gradient(135deg, #10b981, #14b8a6)"
                             }}
                         >
-                            <BarChart3 className="h-5 w-5 text-white" strokeWidth={2.5} />
+                            <div className="relative h-5 w-5">
+                                <BarChart3
+                                    className={`
+                                        absolute inset-0 h-5 w-5 text-white transition-opacity duration-300 
+                                        ${!isOpen ? "group-hover:opacity-0" : "opacity-100"}
+                                    `}
+                                    strokeWidth={2.5}
+                                />
+                                {!isOpen && (
+                                    <PanelLeft
+                                        className="absolute inset-0 h-5 w-5 text-emerald-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                    />
+                                )}
+                            </div>
                         </div>
                         {isOpen && (
                             <span className="truncate text-base font-bold tracking-tight text-white whitespace-nowrap">
@@ -92,16 +117,6 @@ const Sidebar = () => {
 
                 {/* Nav */}
                 <nav className="flex-1 space-y-2 px-3 pt-2">
-                    {!isOpen && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={toggle}
-                            className="mb-4 mx-auto hidden lg:flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-                        >
-                            <PanelRight className="h-5 w-5" />
-                        </Button>
-                    )}
 
                     {navItems.map((item) => (
                         <Button

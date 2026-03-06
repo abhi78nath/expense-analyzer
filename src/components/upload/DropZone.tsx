@@ -89,6 +89,7 @@ const DropZone = ({ selectedFile, onFileSelect }: DropZoneProps) => {
                             {selectedFile.name}
                         </span>
                         <Button
+                            type="button"
                             variant="ghost"
                             size="icon"
                             onClick={handleRemoveFile}
@@ -110,7 +111,7 @@ const DropZone = ({ selectedFile, onFileSelect }: DropZoneProps) => {
                             }`}
                     >
                         <CloudUpload
-                            className={`h-7 w-7 transition-colors duration-300 ${isDragActive ? "text-emerald-400" : "text-[#94a3b8]"
+                            className={`h-7 w-7 transition-colors duration-300 ${isDragActive ? "text-emerald-400" : "text-slate-400"
                                 }`}
                         />
                     </div>
@@ -118,7 +119,7 @@ const DropZone = ({ selectedFile, onFileSelect }: DropZoneProps) => {
                         <p className="text-sm font-medium text-white">
                             Drop your PDF here
                         </p>
-                        <p className="mt-1 text-xs text-[#94a3b8]">or click to browse</p>
+                        <p className="mt-1 text-xs text-slate-400">or click to browse</p>
                     </div>
                 </div>
             )}

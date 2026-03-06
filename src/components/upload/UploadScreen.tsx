@@ -16,7 +16,8 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [password, setPassword] = useState("");
 
-    const handleAnalyze = () => {
+    const handleAnalyze = (e?: React.BaseSyntheticEvent) => {
+        e?.preventDefault();
         if (!selectedFile) return;
         onAnalyze(selectedFile, password || undefined);
     };
@@ -38,7 +39,7 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
                         WebkitBackdropFilter: "blur(24px)",
                     }}
                 >
-                    <div className="space-y-5">
+                    <form onSubmit={handleAnalyze} className="space-y-5">
                         {/* Drop Zone */}
                         <DropZone
                             selectedFile={selectedFile}
@@ -57,9 +58,9 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
                         <AnalyzeButton
                             disabled={!selectedFile}
                             isLoading={isLoading}
-                            onClick={handleAnalyze}
+                            onClick={() => handleAnalyze()}
                         />
-                    </div>
+                    </form>
                 </div>
 
                 {/* Security Note */}
