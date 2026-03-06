@@ -96,7 +96,7 @@ const parseNumber = (text: string): number | null => {
 export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
   // Sort row items by x-coordinate
   const sortedRow = sortRowByColumns(row);
-  
+
   // Skip if we don't have enough items
   if (sortedRow.length < 3) {
     return null;
@@ -104,7 +104,7 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
 
   // Extract text values from sorted items
   const rowTexts = sortedRow.map(item => item.str.trim()).filter(str => str.length > 0);
-  
+
   if (rowTexts.length === 0) {
     return null;
   }
@@ -117,12 +117,12 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
   }
 
   const date = dateMatch[1];
-  
+
   // Last 3 columns are usually Credit, Debit, Balance (in that order)
   let credit: number | null = null;
   let debit: number | null = null;
   let balance: number | null = null;
-  
+
   if (rowTexts.length >= 3) {
     balance = parseNumber(rowTexts[rowTexts.length - 1]);
     debit = parseNumber(rowTexts[rowTexts.length - 2]);
@@ -132,13 +132,13 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
   // Middle columns are Transaction Reference and Ref.No./Chq.No.
   let transactionReference = '';
   let refNoOrChqNo = '';
-  
+
   if (rowTexts.length >= 4) {
     // We have: Date, Transaction Reference, Ref.No./Chq.No., Credit, Debit, Balance
     // Or: Date, Transaction Reference (combined), Ref.No./Chq.No., Credit, Debit, Balance
     const middleStart = 1;
     const middleEnd = rowTexts.length - 3;
-    
+
     if (middleEnd > middleStart) {
       // Transaction Reference might be multiple columns combined
       transactionReference = rowTexts.slice(middleStart, middleEnd - 1).join(' ').trim();
@@ -166,7 +166,7 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
  */
 export const parseTransactionTable = (items: TextItem[]): TransactionRow[] => {
   const rows = groupItemsIntoRows(items);
-  
+
   if (rows.length === 0) {
     return [];
   }
@@ -193,7 +193,7 @@ export const parseTransactionTable = (items: TextItem[]): TransactionRow[] => {
     if (isTableHeader(rows[i])) {
       break;
     }
-    
+
     const row = mapRowToObject(rows[i]);
     if (row) {
       transactionRows.push(row);
@@ -209,7 +209,7 @@ export const parseTransactionTable = (items: TextItem[]): TransactionRow[] => {
 export const parseExpenses = (text: string): Expense[] => {
   const expenses: Expense[] = [];
   const lines = text.split('\n');
-  
+
   // Regex to find amounts with or without currency symbols
   const amountRegex = /(?:\$|€|£)?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+\.\d{2})/;
 
@@ -218,7 +218,7 @@ export const parseExpenses = (text: string): Expense[] => {
     if (match) {
       const amount = parseFloat(match[1].replace(/,/g, ''));
       const description = line.replace(match[0], '').trim();
-      
+
       // Avoid adding lines that are just the amount
       if (description) {
         expenses.push({ description, amount });

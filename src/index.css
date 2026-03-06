@@ -35,7 +35,7 @@ body {
   padding: 0;
   min-height: 100vh;
   background: linear-gradient(160deg, #0f172a 0%, #0a1628 40%, #071a1f 70%, #022c22 100%);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {

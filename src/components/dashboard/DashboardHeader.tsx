@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DateRangePicker } from "./DateRangePicker";
 
 const periods = ["This Week", "This Month", "Last Month", "Custom"] as const;
 
@@ -11,7 +12,7 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
     const [activePeriod, setActivePeriod] = useState<string>("This Month");
 
     return (
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="sticky top-0 z-40 -mx-4 -mt-6 mb-6 flex flex-col gap-4 border-b border-slate-800/40 bg-slate-900/80 px-4 py-4 pt-6 backdrop-blur-xl sm:-mx-6 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:-mx-8 lg:px-8">
             <div>
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
@@ -51,6 +52,12 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
                         {period}
                     </Button>
                 ))}
+                <div className="flex items-center gap-2">
+                    {/* Divider */}
+                    <span className="h-4 w-px bg-slate-700" />
+
+                    <DateRangePicker />
+                </div>
             </div>
         </div>
     );
