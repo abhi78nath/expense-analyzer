@@ -5,9 +5,10 @@ interface AnalyzeButtonProps {
     disabled: boolean;
     isLoading: boolean;
     onClick?: () => void;
+    loadingText?: string;
 }
 
-const AnalyzeButton = ({ disabled, isLoading, onClick }: AnalyzeButtonProps) => {
+const AnalyzeButton = ({ disabled, isLoading, onClick, loadingText }: AnalyzeButtonProps) => {
     return (
         <Button
             type="submit"
@@ -31,7 +32,7 @@ const AnalyzeButton = ({ disabled, isLoading, onClick }: AnalyzeButtonProps) => 
             {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing…
+                    {loadingText || "Analyzing…"}
                 </span>
             ) : (
                 "Analyze Statement"

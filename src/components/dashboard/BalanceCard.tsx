@@ -1,9 +1,10 @@
+import ReactCountUpWrapper from "@/lib/ReactCountUpWrapper";
 import type { LucideIcon } from "lucide-react";
 
 interface BalanceCardProps {
     icon: LucideIcon;
     label: string;
-    amount: string;
+    amount: number;
     subtitle: string;
     accentColor: "emerald" | "teal" | "rose";
     changeText?: string;
@@ -60,7 +61,7 @@ const BalanceCard = ({
                 <div className="space-y-1">
                     <p className="text-xs font-medium text-slate-400">{label}</p>
                     <p className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                        {amount}
+                        <ReactCountUpWrapper value={amount} prefix="₹" />
                     </p>
                 </div>
                 <div

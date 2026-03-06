@@ -6,10 +6,6 @@ interface BalanceCardsRowProps {
     transactions: TransactionRow[];
 }
 
-const formatINR = (value: number): string => {
-    return "₹" + value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-};
-
 const BalanceCardsRow = ({ transactions }: BalanceCardsRowProps) => {
     const totalCredits = transactions.reduce(
         (sum, t) => sum + (t.credit ?? 0),
@@ -35,7 +31,7 @@ const BalanceCardsRow = ({ transactions }: BalanceCardsRowProps) => {
             <BalanceCard
                 icon={Wallet}
                 label="Total Balance"
-                amount={formatINR(lastBalance)}
+                amount={lastBalance}
                 subtitle=""
                 accentColor="emerald"
                 changeText={`${Number(changePercent) >= 0 ? "+" : ""}${changePercent}% this month`}
@@ -44,14 +40,14 @@ const BalanceCardsRow = ({ transactions }: BalanceCardsRowProps) => {
             <BalanceCard
                 icon={TrendingUp}
                 label="Total Credits"
-                amount={formatINR(totalCredits)}
+                amount={totalCredits}
                 subtitle="Income received"
                 accentColor="teal"
             />
             <BalanceCard
                 icon={TrendingDown}
                 label="Total Debits"
-                amount={formatINR(totalDebits)}
+                amount={totalDebits}
                 subtitle="Total expenses"
                 accentColor="rose"
             />

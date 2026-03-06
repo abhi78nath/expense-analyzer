@@ -20,6 +20,7 @@
     "pdfjs-dist": "^5.4.296",
     "radix-ui": "^1.4.3",
     "react": "^19.1.1",
+    "react-countup": "^6.5.3",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.71.2",
