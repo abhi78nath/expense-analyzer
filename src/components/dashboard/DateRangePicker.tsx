@@ -89,7 +89,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between gap-2 border-t border-slate-700/60 px-4 py-3">
-                    {dateRange && (
+                    {dateRange ? (
                         <Button
                             onClick={() => {
                                 dispatch(setDateRange(undefined));
@@ -99,6 +99,8 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                         >
                             Clear
                         </Button>
+                    ) : (
+                        <div></div>
                     )}
                     <div>
                         <Button
