@@ -25,3 +25,6 @@ dist-ssr
 
 # bun
 bun.lock
+
+# env
+.env

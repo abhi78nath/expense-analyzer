@@ -34,7 +34,7 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
                 </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 self-baseline">
                 {periods.map((period) => (
                     <Button
                         key={period}
