@@ -13,14 +13,14 @@ table {
 
 th,
 td {
-  border: 1px solid #334155;
+  /* border: 1px solid #334155; */
   padding: 8px;
   text-align: left;
   color: #e2e8f0;
 }
 
 th {
-  background-color: #1e293b;
+  /* background-color: #1e293b; */
   color: #94a3b8;
 }
 

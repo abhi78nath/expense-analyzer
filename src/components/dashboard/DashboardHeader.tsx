@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
-    const [activePeriod, setActivePeriod] = useState<string>("This Month");
+    // const [activePeriod, setActivePeriod] = useState<string>("This Month");
 
     return (
         <div className="sticky top-0 z-40 -mx-4 -mt-6 mb-6 flex flex-col gap-4 border-b border-slate-800/40 bg-slate-900/80 px-4 py-4 pt-6 backdrop-blur-xl sm:-mx-6 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:-mx-8 lg:px-8">
@@ -35,7 +35,7 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
             </div>
 
             <div className="flex flex-wrap gap-2 self-baseline">
-                {periods.map((period) => (
+                {/* {periods.map((period) => (
                     <Button
                         key={period}
                         variant="ghost"
@@ -51,10 +51,10 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
                     >
                         {period}
                     </Button>
-                ))}
+                ))} */}
                 <div className="flex items-center gap-2">
                     {/* Divider */}
-                    <span className="h-4 w-px bg-slate-700" />
+                    {/* <span className="h-4 w-px bg-slate-700" /> */}
 
                     <DateRangePicker />
                 </div>

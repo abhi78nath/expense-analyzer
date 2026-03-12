@@ -6,8 +6,10 @@ import CreditsDebitsChart from "./CreditsDebitsChart";
 import RecentTransactions from "./RecentTransactions";
 import type { TransactionRow } from "@/utils/textParser";
 import type { RootState } from "@/shared/redux/store";
-import { useSelector } from "react-redux";
-import { useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useMemo, useEffect } from "react";
+import { startOfMonth, endOfMonth } from "date-fns";
+import { setDateRange } from "@/shared/redux/features";
 
 interface DashboardScreenProps {
     transactions: TransactionRow[];
@@ -17,6 +19,39 @@ interface DashboardScreenProps {
 const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps) => {
 
     const dateRange = useSelector((state: RootState) => state.dateRange.dateRange);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        // Initialize date range if it's not set and we have transactions
+        if (transactions.length > 0 && !dateRange) {
+            const parseTxnDate = (dateStr: string) => {
+                const [day, month, year] = dateStr.split("-");
+                return new Date(2000 + Number(year), Number(month) - 1, Number(day));
+            };
+
+            let minTime = Infinity;
+            let maxTime = -Infinity;
+
+            transactions.forEach(txn => {
+                if (!txn.date) return;
+                const date = parseTxnDate(txn.date);
+                const time = date.getTime();
+                if (time < minTime) minTime = time;
+                if (time > maxTime) maxTime = time;
+            });
+
+            if (minTime !== Infinity && maxTime !== -Infinity) {
+                const start = startOfMonth(new Date(minTime));
+                const end = endOfMonth(new Date(maxTime));
+
+                dispatch(setDateRange({
+                    from: start,
+                    to: end
+                }));
+            }
+        }
+    }, [transactions, dateRange, dispatch]);
+
     console.log(dateRange, 'dateRange')
 
     const filteredTransactions = useMemo(() => {
@@ -40,6 +75,7 @@ const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps)
 
     }, [dateRange, transactions]);
 
+    console.log(filteredTransactions, 'filteredTransactions')
     return (
         <SidebarProvider>
             <DashboardLayout>

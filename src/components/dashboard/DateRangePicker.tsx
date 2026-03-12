@@ -5,12 +5,8 @@ import type { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import { setDateRange } from "@/shared/redux/features";
@@ -22,23 +18,40 @@ interface DateRangePickerProps {
 export function DateRangePicker({ className }: DateRangePickerProps) {
     const dateRange = useSelector((state: RootState) => state.dateRange.dateRange);
     const [selectedDate, setSelectedDate] = useState<DateRange | undefined>(dateRange);
+    const [month, setMonth] = useState<Date | undefined>(dateRange?.from ? new Date(dateRange.from) : undefined);
     const [open, setOpen] = useState(false);
 
     const dispatch = useDispatch();
 
+    // Sync local selection and calendar month with Redux state
+    useEffect(() => {
+        const from = dateRange?.from ? new Date(dateRange.from) : undefined;
+        const to = dateRange?.to ? new Date(dateRange.to) : undefined;
+        const range = { from, to };
+
+        setSelectedDate(range);
+        if (from) {
+            setMonth(from);
+        }
+    }, [dateRange]);
+
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
         if (newOpen) {
-            setSelectedDate(dateRange);
+            // Re-sync when opening to ensure fresh state
+            const from = dateRange?.from ? new Date(dateRange.from) : undefined;
+            const to = dateRange?.to ? new Date(dateRange.to) : undefined;
+            setSelectedDate({ from, to });
+            if (from) setMonth(from);
         }
     }
 
 
     const label =
         dateRange?.from && dateRange?.to
-            ? `${format(dateRange.from, "MMM d, yyyy")} – ${format(dateRange.to, "MMM d, yyyy")}`
+            ? `${format(new Date(dateRange.from), "MMM d, yyyy")} – ${format(new Date(dateRange.to), "MMM d, yyyy")}`
             : dateRange?.from
-                ? format(dateRange.from, "MMM d, yyyy")
+                ? format(new Date(dateRange.from), "MMM d, yyyy")
                 : "Pick a date range";
 
     const handleApplyDateRange = () => {
@@ -71,25 +84,27 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                     mode="range"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
+                    month={month}
+                    onMonthChange={setMonth}
                     numberOfMonths={2}
                     className="p-3 [--cell-size:2rem] text-slate-200"
                     classNames={{
                         months: "relative flex flex-col sm:flex-row gap-4",
                         month_caption: "flex h-[--cell-size] w-full items-center justify-center px-[--cell-size] text-slate-200",
-                        day: "group/day relative aspect-square h-full w-full select-none p-0 text-center text-slate-300 [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md",
+                        day: "group/day relative aspect-square h-full w-full select-none p-0 text-center text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors cursor-pointer [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md",
                         today: "bg-slate-700/60 text-slate-100 rounded-md data-[selected=true]:rounded-none",
                         outside: "text-slate-600 aria-selected:text-slate-500",
                         disabled: "text-slate-700 opacity-50",
                         weekday: "text-slate-500 flex-1 select-none rounded-md text-[0.8rem] font-normal",
-                        range_start: "bg-emerald-500/20 rounded-l-md",
-                        range_middle: "bg-emerald-500/10 rounded-none",
-                        range_end: "bg-emerald-500/20 rounded-r-md",
+                        range_start: "bg-emerald-500/20 rounded-l-md hover:bg-emerald-500/30",
+                        range_middle: "bg-emerald-500/10 rounded-none hover:bg-emerald-500/20",
+                        range_end: "bg-emerald-500/20 rounded-r-md hover:bg-emerald-500/30",
                     }}
                 />
 
                 {/* Footer */}
-                <div className="flex items-center justify-between gap-2 border-t border-slate-700/60 px-4 py-3">
-                    {dateRange ? (
+                <div className="flex items-center justify-end gap-2 border-t border-slate-700/60 px-4 py-3">
+                    {/* {dateRange ? (
                         <Button
                             onClick={() => {
                                 dispatch(setDateRange(undefined));
@@ -101,7 +116,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                         </Button>
                     ) : (
                         <div></div>
-                    )}
+                    )} */}
                     <div>
                         <Button
                             size="sm"

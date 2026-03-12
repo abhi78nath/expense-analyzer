@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { pdfjs } from 'react-pdf';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setDateRange } from './shared/redux/features';
 import UploadScreen from './components/upload/UploadScreen';
 import DashboardScreen from './components/dashboard/DashboardScreen';
 import { parsePdfWithPython } from './utils/api';
@@ -18,6 +20,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   // Redirect to home if /dashboard is accessed without data
   useEffect(() => {
@@ -30,6 +33,7 @@ function App() {
     setIsParsing(true);
     setErrorMessage('');
     setTransactionRows([]);
+    dispatch(setDateRange(undefined));
 
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -77,6 +81,7 @@ function App() {
   const handleBackToUpload = () => {
     setTransactionRows([]);
     setErrorMessage('');
+    dispatch(setDateRange(undefined));
     navigate('/');
   };
 
