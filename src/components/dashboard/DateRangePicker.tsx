@@ -66,24 +66,6 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                 align="end"
                 className="w-auto border-slate-700 bg-slate-900 p-0 shadow-xl shadow-black/40"
             >
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-700/60 px-4 py-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        Date Range
-                    </span>
-                    {dateRange && (
-                        <button
-                            onClick={() => {
-                                dispatch(setDateRange(undefined));
-                                setSelectedDate(undefined);
-                            }}
-                            className="text-xs text-slate-500 transition-colors hover:text-slate-300 cursor-pointer"
-                        >
-                            Clear
-                        </button>
-                    )}
-                </div>
-
                 {/* Calendar */}
                 <Calendar
                     mode="range"
@@ -92,13 +74,13 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                     numberOfMonths={2}
                     className="p-3 [--cell-size:2rem] text-slate-200"
                     classNames={{
-                        months: "flex flex-col sm:flex-row gap-4",
-                        month_caption: "text-slate-200",
-                        day: "group/day relative aspect-square h-full w-full select-none p-0 text-center text-slate-300",
+                        months: "relative flex flex-col sm:flex-row gap-4",
+                        month_caption: "flex h-[--cell-size] w-full items-center justify-center px-[--cell-size] text-slate-200",
+                        day: "group/day relative aspect-square h-full w-full select-none p-0 text-center text-slate-300 [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md",
                         today: "bg-slate-700/60 text-slate-100 rounded-md data-[selected=true]:rounded-none",
                         outside: "text-slate-600 aria-selected:text-slate-500",
                         disabled: "text-slate-700 opacity-50",
-                        weekday: "text-slate-500 flex-1 select-none rounded-md text-[0.75rem] font-normal",
+                        weekday: "text-slate-500 flex-1 select-none rounded-md text-[0.8rem] font-normal",
                         range_start: "bg-emerald-500/20 rounded-l-md",
                         range_middle: "bg-emerald-500/10 rounded-none",
                         range_end: "bg-emerald-500/20 rounded-r-md",
@@ -106,24 +88,37 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                 />
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-2 border-t border-slate-700/60 px-4 py-3">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-3 text-xs text-slate-400 hover:text-white cursor-pointer"
-                        onClick={() => {
-                            setOpen(false);
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="h-7 bg-emerald-500/20 px-3 text-xs text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 border border-emerald-500/30 cursor-pointer"
-                        onClick={() => { handleApplyDateRange() }}
-                    >
-                        Apply
-                    </Button>
+                <div className="flex items-center justify-between gap-2 border-t border-slate-700/60 px-4 py-3">
+                    {dateRange && (
+                        <Button
+                            onClick={() => {
+                                dispatch(setDateRange(undefined));
+                                setSelectedDate(undefined);
+                            }}
+                            className="h-7 px-3 text-xs text-slate-400 hover:text-white cursor-pointer"
+                        >
+                            Clear
+                        </Button>
+                    )}
+                    <div>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-3 text-xs text-slate-400 hover:text-white cursor-pointer"
+                            onClick={() => {
+                                setOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            size="sm"
+                            className="h-7 bg-emerald-500/20 px-3 text-xs text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 border border-emerald-500/30 cursor-pointer"
+                            onClick={() => { handleApplyDateRange() }}
+                        >
+                            Apply
+                        </Button>
+                    </div>
                 </div>
             </PopoverContent>
         </Popover>
