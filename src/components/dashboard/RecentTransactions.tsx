@@ -45,7 +45,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
 
             <ScrollArea className="h-[400px] w-full rounded-md border border-slate-800/50">
                 <Table>
-                    <TableHeader className="bg-slate-900/50 sticky top-0 z-10">
+                    <TableHeader className="bg-slate-900 sticky top-0 z-10">
                         <TableRow className="hover:bg-transparent border-slate-800">
                             <TableHead className="w-[100px] text-slate-400">Date</TableHead>
                             <TableHead className="text-slate-400">Description</TableHead>
@@ -78,7 +78,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                                                     <ArrowUpRight className="h-3 w-3 text-rose-400" />
                                                 )}
                                             </div>
-                                            <span className="truncate text-xs text-white max-w-[200px] block">
+                                            <span className="text-xs text-white max-w-[400px] block">
                                                 {t.transactionReference || "Transaction"}
                                             </span>
                                         </div>
