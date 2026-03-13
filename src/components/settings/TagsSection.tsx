@@ -52,65 +52,64 @@ const TagsSection = ({ rules, loading, error }: TagsSectionProps) => {
         );
     }
 
-    if (!rules || rules.length === 0) {
-        return (
-            <div className="text-center py-24 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl m-6">
-                <p className="text-slate-500 font-medium">No merchant rules available.</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="p-1 sm:p-6 animate-in fade-in duration-500">
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
-                <Table>
-                    <TableHeader className="bg-slate-50/50 dark:bg-slate-800/30">
-                        <TableRow className="hover:bg-transparent border-slate-200 dark:border-slate-800">
-                            <TableHead className="w-[40%] font-bold text-slate-900 dark:text-white py-4">Merchant</TableHead>
-                            <TableHead className="font-bold text-slate-900 dark:text-white py-4">Category</TableHead>
-                            <TableHead className="font-bold text-slate-900 dark:text-white py-4">Default Tag</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {rules.map((rule, index) => {
-                            const color = getTagColor(rule.tag);
-                            return (
-                                <TableRow
-                                    key={`${rule.merchant}-${index}`}
-                                    className="group border-slate-100 dark:border-slate-800/50 hover:bg-emerald-500/[0.02] transition-colors"
-                                >
-                                    <TableCell className="py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
-                                                <Tag className="w-4 h-4" />
+        <div className="p-1 sm:p-6 animate-in fade-in duration-500 space-y-6">
+            {!rules || rules.length === 0 ? (
+                <div className="text-center py-24 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+                    <p className="text-slate-500 font-medium">No merchant rules available.</p>
+                </div>
+            ) : (
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
+                    <Table>
+                        <TableHeader className="bg-slate-50/50 dark:bg-slate-800/30">
+                            <TableRow className="hover:bg-transparent border-slate-200 dark:border-slate-800">
+                                <TableHead className="w-[40%] font-bold text-slate-900 dark:text-white py-4">Merchant</TableHead>
+                                <TableHead className="font-bold text-slate-900 dark:text-white py-4">Category</TableHead>
+                                <TableHead className="font-bold text-slate-900 dark:text-white py-4">Default Tag</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {rules.map((rule, index) => {
+                                const color = getTagColor(rule.tag);
+                                return (
+                                    <TableRow
+                                        key={`${rule.merchant}-${index}`}
+                                        className="group border-slate-100 dark:border-slate-800/50 hover:bg-emerald-500/[0.02] transition-colors"
+                                    >
+                                        <TableCell className="py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
+                                                    <Tag className="w-4 h-4" />
+                                                </div>
+                                                <span className="font-semibold text-slate-900 dark:text-white">{rule.merchant}</span>
                                             </div>
-                                            <span className="font-semibold text-slate-900 dark:text-white">{rule.merchant}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="py-4">
-                                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-medium px-2.5 py-0.5 rounded-lg">
-                                            {rule.category}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="py-4">
-                                        <Badge
-                                            className="border-none shadow-none font-bold px-2.5 py-0.5 rounded-lg"
-                                            style={{
-                                                backgroundColor: `${color}20`, // 12% opacity (20 in hex)
-                                                color: color
-                                            }}
-                                        >
-                                            {rule.tag}
-                                        </Badge>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </div>
+                                        </TableCell>
+                                        <TableCell className="py-4">
+                                            <Badge variant="outline" className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-medium px-2.5 py-0.5 rounded-lg">
+                                                {rule.category}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="py-4">
+                                            <Badge
+                                                className="border-none shadow-none font-bold px-2.5 py-0.5 rounded-lg"
+                                                style={{
+                                                    backgroundColor: `${color}20`,
+                                                    color: color
+                                                }}
+                                            >
+                                                {rule.tag}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
         </div>
     );
 };
+
 
 export default TagsSection;

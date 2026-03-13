@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { getTransactionTags } from '../../utils/api';
-import { Tag, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Tag, ShieldCheck } from 'lucide-react';
 import { SidebarProvider } from '../dashboard/SidebarContext';
 import DashboardLayout from '../dashboard/DashboardLayout';
 import TagsSection from './TagsSection';
+import { AddTagDrawer } from './AddTagDrawer';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,13 +14,19 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+interface MerchantRule {
+    merchant: string;
+    category: string;
+    tag: string;
+}
+
 interface SettingsScreenProps {
     onBack: () => void;
 }
 
 const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
     const [activeTab, setActiveTab] = useState<'tags' | 'profile'>('tags');
-    const [rules, setRules] = useState<any[] | null>(null);
+    const [rules, setRules] = useState<MerchantRule[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +44,11 @@ const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
         fetchRules();
     }, []);
+
+    const handleAddRule = (newRule: MerchantRule) => {
+        console.log('Adding new rule:', newRule);
+        // In a real app, this would hit an API and update state
+    };
 
     return (
         <SidebarProvider>
@@ -95,16 +107,21 @@ const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
 
                         {/* Main Content Area (Tab Content Wrapper) */}
                         <div className="bg-white dark:bg-slate-900 rounded-b-2xl rounded-tr-2xl shadow-xl border border-t-0 border-slate-200 dark:border-slate-800 overflow-hidden backdrop-blur-sm shadow-emerald-500/5">
-                            <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/10 dark:bg-slate-800/20">
-                                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                                    {activeTab === 'tags' ? 'Categorization Rules' : 'Profile'}
-                                </h2>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                                    {activeTab === 'tags'
-                                        ? 'Define how transactions should be tagged based on merchant names.'
-                                        : 'Configure your application preferences and user experience settings.'
-                                    }
-                                </p>
+                            <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/10 dark:bg-slate-800/20 flex items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                                        {activeTab === 'tags' ? 'Categorization Rules' : 'Profile'}
+                                    </h2>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                                        {activeTab === 'tags'
+                                            ? 'Define how transactions should be tagged based on merchant names.'
+                                            : 'Configure your application preferences and user experience settings.'
+                                        }
+                                    </p>
+                                </div>
+                                {activeTab === 'tags' && (
+                                    <AddTagDrawer rules={rules} onAdd={handleAddRule} />
+                                )}
                             </div>
 
                             {activeTab === 'tags' && (
