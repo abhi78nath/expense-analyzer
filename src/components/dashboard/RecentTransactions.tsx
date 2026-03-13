@@ -1,4 +1,5 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ArrowDownRight, ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import {
     Table,
@@ -17,14 +18,66 @@ interface RecentTransactionsProps {
     transactions: TransactionRow[];
 }
 
+type SortColumn = "date" | "amount";
+type SortOrder = "asc" | "desc" | null;
+
 const formatINR = (v: number) =>
     "₹" + Math.abs(v).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
-    // Show all transactions, newest first
-    const allTransactions = [...transactions].reverse();
+const parseTxnDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split("-");
+    return new Date(2000 + Number(year), Number(month) - 1, Number(day));
+};
 
-    if (allTransactions.length === 0) {
+const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+    const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+    const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+
+    const sortedTransactions = useMemo(() => {
+        let result = [...transactions];
+
+        if (sortColumn && sortOrder) {
+            result.sort((a, b) => {
+                if (sortColumn === "date") {
+                    const dateA = parseTxnDate(a.date).getTime();
+                    const dateB = parseTxnDate(b.date).getTime();
+                    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+                }
+                if (sortColumn === "amount") {
+                    const amountA = (a.credit ?? 0) - (a.debit ?? 0);
+                    const amountB = (b.credit ?? 0) - (b.debit ?? 0);
+                    return sortOrder === "asc" ? amountA - amountB : amountB - amountA;
+                }
+                return 0;
+            });
+        } else {
+            // Default: newest first
+            result.reverse();
+        }
+
+        return result;
+    }, [transactions, sortColumn, sortOrder]);
+
+    const handleSort = (column: SortColumn) => {
+        if (sortColumn === column) {
+            if (sortOrder === "asc") setSortOrder("desc");
+            else if (sortOrder === "desc") {
+                setSortColumn(null);
+                setSortOrder(null);
+            }
+            else setSortOrder("asc");
+        } else {
+            setSortColumn(column);
+            setSortOrder("asc");
+        }
+    };
+
+    const SortIcon = ({ column }: { column: SortColumn }) => {
+        if (sortColumn !== column || !sortOrder) return <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />;
+        return sortOrder === "asc" ? <ChevronUp className="ml-1 h-3 w-3 text-teal-400" /> : <ChevronDown className="ml-1 h-3 w-3 text-teal-400" />;
+    };
+
+    if (transactions.length === 0) {
         return null;
     }
 
@@ -42,7 +95,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                     All Transactions
                 </h2>
                 <p className="text-xs text-slate-500">
-                    Showing {allTransactions.length} transactions from your statement
+                    Showing {transactions.length} transactions from your statement
                 </p>
             </div>
 
@@ -50,15 +103,29 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                 <Table>
                     <TableHeader className="bg-slate-900 sticky top-0 z-10">
                         <TableRow className="hover:bg-transparent border-slate-800">
-                            <TableHead className="w-[100px] text-slate-400">Date</TableHead>
+                            <TableHead
+                                className="w-[120px] text-slate-400 cursor-pointer hover:text-slate-200 transition-colors select-none"
+                                onClick={() => handleSort("date")}
+                            >
+                                <div className="flex items-center">
+                                    Date <SortIcon column="date" />
+                                </div>
+                            </TableHead>
                             <TableHead className="text-slate-400">Description</TableHead>
                             <TableHead className="text-slate-400">Ref / Chq</TableHead>
-                            <TableHead className="text-right text-slate-400">Amount</TableHead>
+                            <TableHead
+                                className="text-right text-slate-400 cursor-pointer hover:text-slate-200 transition-colors select-none"
+                                onClick={() => handleSort("amount")}
+                            >
+                                <div className="flex items-center justify-end">
+                                    Amount <SortIcon column="amount" />
+                                </div>
+                            </TableHead>
                             <TableHead className="text-center text-slate-400">Tags</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {allTransactions.map((t, idx) => {
+                        {sortedTransactions.map((t, idx) => {
                             const isCredit = (t.credit ?? 0) > 0;
                             const amount = isCredit ? t.credit! : t.debit ?? 0;
 
