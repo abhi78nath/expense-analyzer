@@ -9,6 +9,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { tagColors } from "@/lib/tagColors";
+import { capitalize, getContrastColor } from "@/utils/colorUtils";
 
 interface RecentTransactionsProps {
     transactions: TransactionRow[];
@@ -51,6 +54,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                             <TableHead className="text-slate-400">Description</TableHead>
                             <TableHead className="text-slate-400">Ref / Chq</TableHead>
                             <TableHead className="text-right text-slate-400">Amount</TableHead>
+                            <TableHead className="text-center text-slate-400">Tags</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -98,6 +102,28 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                                                 </span>
                                             )}
                                         </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {t.tag ? (
+                                            (() => {
+                                                const bgColor = tagColors[t.tag.toLowerCase()] || tagColors["other"];
+                                                const textColor = getContrastColor(bgColor);
+                                                return (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-none text-xs font-bold px-2 py-0"
+                                                        style={{
+                                                            backgroundColor: bgColor,
+                                                            color: textColor
+                                                        }}
+                                                    >
+                                                        {capitalize(t.tag)}
+                                                    </Badge>
+                                                );
+                                            })()
+                                        ) : (
+                                            <span className="text-sm text-slate-500 font-mono">-</span>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             );

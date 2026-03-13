@@ -16,6 +16,7 @@ export interface TransactionRow {
   credit: number | null;
   debit: number | null;
   balance: number | null;
+  tag: string;
 }
 
 const Y_TOLERANCE = 3; // Pixels tolerance for grouping items into rows
@@ -157,7 +158,8 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
     refNoOrChqNo,
     credit,
     debit,
-    balance
+    balance,
+    tag: "other"
   };
 };
 
