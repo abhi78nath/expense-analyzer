@@ -101,7 +101,7 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
     if (dailyData.length === 0) {
         return (
             <div
-                className="rounded-2xl border border-slate-700/60 p-6 mb-6"
+                className="rounded-2xl border border-slate-700/60 p-6"
                 style={{
                     background: "rgba(30, 41, 59, 0.50)",
                     backdropFilter: "blur(16px)",
@@ -115,7 +115,7 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
 
     return (
         <div
-            className="rounded-2xl border border-slate-700/60 p-6 mb-6"
+            className="rounded-2xl border border-slate-700/60 p-6"
             style={{
                 background: "rgba(30, 41, 59, 0.50)",
                 backdropFilter: "blur(16px)",
