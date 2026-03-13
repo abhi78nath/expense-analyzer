@@ -29,3 +29,15 @@ export const parsePdfWithPython = async (file: File, password?: string): Promise
 
     return response.json();
 };
+export const getTransactionTags = async (): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/transaction-tags`, {
+        method: 'GET',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch transaction tags');
+    }
+
+    return response.json();
+};

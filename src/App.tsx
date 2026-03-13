@@ -8,6 +8,7 @@ import UploadScreen from './components/upload/UploadScreen';
 import DashboardScreen from './components/dashboard/DashboardScreen';
 import { parsePdfWithPython } from './utils/api';
 import type { TransactionRow } from './utils/textParser';
+import SettingsScreen from './components/settings/SettingsScreen';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -105,6 +106,12 @@ function App() {
             transactions={transactionRows}
             onBackToUpload={handleBackToUpload}
           />
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <SettingsScreen onBack={handleBackToUpload} />
         }
       />
     </Routes>
