@@ -92,7 +92,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
     const MyCustomPie = (props: PieSectorShapeProps) => {
         const { payload } = props;
         const color = tagColors[payload.name.toLowerCase()] || tagColors["other"];
-        return <Sector {...props} fill={color} />;
+        return <Sector {...props} fill={color} stroke="none" />;
     };
     return (
         <div
@@ -122,6 +122,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                             label={renderCustomizedLabel}
                             labelLine={{ stroke: '#334155', strokeWidth: 1 }}
                             shape={MyCustomPie}
+                            stroke="none"
                         />
 
                         <Tooltip content={<CustomTooltip />} />
