@@ -22,8 +22,8 @@ const BalanceCardsRow = ({ transactions }: BalanceCardsRowProps) => {
 
     // Calculate approximate month-over-month change
     const changePercent =
-        totalDebits > 0
-            ? (((totalCredits - totalDebits) / totalDebits) * 100).toFixed(1)
+        totalCredits > 0
+            ? (((totalCredits - totalDebits) / totalCredits) * 100).toFixed(1)
             : "0";
 
     return (
