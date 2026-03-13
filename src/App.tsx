@@ -62,6 +62,7 @@ function App() {
         debit: typeof t["debit"] === "number" ? t["debit"] : null,
         credit: typeof t["credit"] === "number" ? t["credit"] : null,
         balance: typeof t["balance"] === "number" ? t["balance"] : null,
+        tag: t["tag"] || "other"
       }));
 
       setTransactionRows(rows);
