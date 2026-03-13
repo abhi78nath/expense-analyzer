@@ -3,6 +3,7 @@ import DashboardLayout from "./DashboardLayout";
 import DashboardHeader from "./DashboardHeader";
 import BalanceCardsRow from "./BalanceCardsRow";
 import CreditsDebitsChart from "./CreditsDebitsChart";
+import TagDistributionChart from "./TagDistributionChart";
 import RecentTransactions from "./RecentTransactions";
 import type { TransactionRow } from "@/utils/textParser";
 import type { RootState } from "@/shared/redux/store";
@@ -81,7 +82,14 @@ const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps)
             <DashboardLayout>
                 <DashboardHeader onBackToUpload={onBackToUpload} />
                 <BalanceCardsRow transactions={filteredTransactions} />
-                <CreditsDebitsChart transactions={filteredTransactions} />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="lg:col-span-2">
+                        <CreditsDebitsChart transactions={filteredTransactions} />
+                    </div>
+                    <div className="lg:col-span-1">
+                        <TagDistributionChart transactions={filteredTransactions} />
+                    </div>
+                </div>
                 <RecentTransactions transactions={filteredTransactions} />
             </DashboardLayout>
         </SidebarProvider>
