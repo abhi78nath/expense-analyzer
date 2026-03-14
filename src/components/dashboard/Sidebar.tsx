@@ -8,24 +8,27 @@ import {
     PanelLeft,
     X,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarContext";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const navItems = [
-    { label: "Dashboard", icon: LayoutDashboard, active: true },
+    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { label: "Analytics", icon: TrendingUp, disabled: true },
     { label: "Budgets", icon: Wallet, disabled: true },
 ];
 
 const bottomItems = [
-    { label: "Settings", icon: Settings },
+    { label: "Settings", icon: Settings, path: "/settings" },
     { label: "Help", icon: HelpCircle },
 ];
 
 const Sidebar = () => {
     const { isOpen, toggle, close } = useSidebar();
     const [hovered, setHovered] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
     const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
     return (
@@ -118,54 +121,66 @@ const Sidebar = () => {
                 {/* Nav */}
                 <nav className="flex-1 space-y-2 px-3 pt-2">
 
-                    {navItems.map((item) => (
-                        <Button
-                            key={item.label}
-                            variant="ghost"
-                            disabled={item.disabled}
-                            title={!isOpen ? item.label : undefined}
-                            className={`
-                flex items-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium
-                transition-all duration-200 cursor-pointer h-auto w-full
-                ${isOpen ? "justify-start px-3" : "justify-center"}
-                ${item.active
-                                    ? "bg-emerald-500/15 text-emerald-400 shadow-sm shadow-emerald-500/5 hover:bg-emerald-500/20 hover:text-emerald-400"
-                                    : item.disabled
-                                        ? "text-slate-600 cursor-not-allowed opacity-50"
-                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                }
-              `}
-                        >
-                            <item.icon className="h-5 w-5 shrink-0" />
-                            {isOpen && (
-                                <span className="truncate whitespace-nowrap">{item.label}</span>
-                            )}
-                            {isOpen && item.disabled && (
-                                <span className="ml-auto rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-600 uppercase font-bold">
-                                    Soon
-                                </span>
-                            )}
-                        </Button>
-                    ))}
+                    {navItems.map((item) => {
+                        const isActive = item.path === location.pathname;
+                        return (
+                            <Button
+                                key={item.label}
+                                variant="ghost"
+                                disabled={item.disabled}
+                                title={!isOpen ? item.label : undefined}
+                                onClick={() => item.path && navigate(item.path)}
+                                className={`
+                    flex items-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium
+                    transition-all duration-200 cursor-pointer h-auto w-full
+                    ${isOpen ? "justify-start px-3" : "justify-center"}
+                    ${isActive
+                                        ? "bg-emerald-500/15 text-emerald-400 shadow-sm shadow-emerald-500/5 hover:bg-emerald-500/20 hover:text-emerald-400"
+                                        : item.disabled
+                                            ? "text-slate-600 cursor-not-allowed opacity-50"
+                                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                    }
+                  `}
+                            >
+                                <item.icon className="h-5 w-5 shrink-0" />
+                                {isOpen && (
+                                    <span className="truncate whitespace-nowrap">{item.label}</span>
+                                )}
+                                {isOpen && item.disabled && (
+                                    <span className="ml-auto rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-600 uppercase font-bold">
+                                        Soon
+                                    </span>
+                                )}
+                            </Button>
+                        );
+                    })}
                 </nav>
 
                 {/* Bottom */}
                 <div className="space-y-2 border-t border-slate-800 px-3 py-4">
-                    {bottomItems.map((item) => (
-                        <Button
-                            key={item.label}
-                            variant="ghost"
-                            title={!isOpen ? item.label : undefined}
-                            className={`
-                flex items-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium
-                text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer h-auto w-full
-                ${isOpen ? "justify-start px-3" : "justify-center"}
-              `}
-                        >
-                            <item.icon className="h-5 w-5 shrink-0" />
-                            {isOpen && <span className="truncate whitespace-nowrap">{item.label}</span>}
-                        </Button>
-                    ))}
+                    {bottomItems.map((item) => {
+                        const isActive = item.path === location.pathname;
+                        return (
+                            <Button
+                                key={item.label}
+                                variant="ghost"
+                                title={!isOpen ? item.label : undefined}
+                                onClick={() => item.path && navigate(item.path)}
+                                className={`
+                    flex items-center gap-3 rounded-xl px-0 py-2.5 text-sm font-medium
+                    transition-all duration-200 cursor-pointer h-auto w-full
+                    ${isOpen ? "justify-start px-3" : "justify-center"}
+                    ${isActive
+                                        ? "bg-emerald-500/15 text-emerald-400 shadow-sm shadow-emerald-500/5 hover:bg-emerald-500/20 hover:text-emerald-400"
+                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                    }
+                  `}
+                            >
+                                <item.icon className="h-5 w-5 shrink-0" />
+                                {isOpen && <span className="truncate whitespace-nowrap">{item.label}</span>}
+                            </Button>
+                        );
+                    })}
                 </div>
             </aside>
         </>
