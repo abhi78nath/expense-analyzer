@@ -30,31 +30,34 @@ function App() {
     }
   }, [location.pathname, transactionRows.length, navigate]);
 
-  const handleAnalyze = async (file: File, password?: string) => {
+  const handleAnalyze = async (files: File[], password?: string) => {
     setIsParsing(true);
     setErrorMessage('');
     setTransactionRows([]);
     dispatch(setDateRange(undefined));
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const loadingTask = pdfjs.getDocument({ data: arrayBuffer, password });
+      // Check each file for password protection if not already handled
+      for (const file of files) {
+        const arrayBuffer = await file.arrayBuffer();
+        const loadingTask = pdfjs.getDocument({ data: arrayBuffer, password });
 
-      try {
-        await loadingTask.promise;
-      } catch (pdfError: any) {
-        if (
-          pdfError.name === 'PasswordException' ||
-          (pdfError.message && pdfError.message.toLowerCase().includes('password'))
-        ) {
-          setErrorMessage('This PDF is password protected. Please provide the correct password.');
-          setIsParsing(false);
-          return;
+        try {
+          await loadingTask.promise;
+        } catch (pdfError: any) {
+          if (
+            pdfError.name === 'PasswordException' ||
+            (pdfError.message && pdfError.message.toLowerCase().includes('password'))
+          ) {
+            setErrorMessage(`File "${file.name}" is password protected. Please provide the correct password.`);
+            setIsParsing(false);
+            return;
+          }
+          throw pdfError;
         }
-        throw pdfError;
       }
 
-      const response = await parsePdfWithPython(file, password);
+      const response = await parsePdfWithPython(files, password);
 
       const rows: TransactionRow[] = response.transactions.map((t: any) => ({
         date: String(t["date"] || ""),
@@ -71,9 +74,9 @@ function App() {
     } catch (error: any) {
       console.error('Error parsing PDF:', error);
       if (error.message?.includes('401') || error.message?.toLowerCase().includes('password')) {
-        setErrorMessage('Password failed. Please try again.');
+        setErrorMessage('Password failed for one or more files. Please try again.');
       } else {
-        setErrorMessage(error.message || 'Failed to parse PDF.');
+        setErrorMessage(error.message || 'Failed to parse PDF(s).');
       }
     } finally {
       setIsParsing(false);

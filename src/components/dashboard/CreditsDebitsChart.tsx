@@ -82,15 +82,22 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
             map.set(key, existing);
         });
 
-        // Sort by key and take last 15 days to avoid overcrowding
+        // Sort by key
         const sorted = [...map.entries()]
-            .sort(([a], [b]) => a.localeCompare(b))
-            .slice(-15);
+            .sort(([a], [b]) => a.localeCompare(b));
+
+        // Determine if data spans multiple years
+        const years = new Set(sorted.map(([key]) => key.split("-")[0]));
+        const isMultiYear = years.size > 1;
 
         return sorted.map(([key, data]) => {
             const d = data.dateObj;
+            const label = isMultiYear
+                ? `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`
+                : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
             return {
-                label: `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`,
+                label,
                 fullDate: key,
                 credits: data.credits,
                 debits: data.debits,
@@ -113,6 +120,7 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
         );
     }
 
+    console.log(dailyData, 'dailyData')
     return (
         <div
             className="rounded-2xl border border-slate-700/60 p-6"
@@ -126,7 +134,7 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-white">Credits vs Debits</h2>
-                    <p className="text-xs text-slate-500">Daily comparison over the last 15 transaction days</p>
+                    <p className="text-xs text-slate-500">Daily comparison of credits and debits</p>
                 </div>
 
                 <div className="flex items-center gap-4">
