@@ -1,18 +1,21 @@
 export interface ParseResponse {
-    filename: string;
+    filenames: string[];
     total_transactions: number;
-    transactions: any[][];
+    transactions: any[];
     metadata: {
-        content_type: string;
-        size: number;
+        file_count: number;
+        total_size: number;
     };
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const parsePdfWithPython = async (file: File, password?: string): Promise<ParseResponse> => {
+export const parsePdfWithPython = async (files: File[], password?: string): Promise<ParseResponse> => {
     const formData = new FormData();
-    formData.append('file', file);
+    files.forEach(file => {
+        formData.append('files', file);
+    });
+
     if (password) {
         formData.append('password', password);
     }
@@ -24,7 +27,7 @@ export const parsePdfWithPython = async (file: File, password?: string): Promise
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to parse PDF with Python API');
+        throw new Error(errorData.detail || 'Failed to parse PDF(s) with Python API');
     }
 
     return response.json();
