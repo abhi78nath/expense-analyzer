@@ -5,7 +5,9 @@ import {
     ChevronUp,
     ChevronDown,
     ChevronsUpDown,
-    Filter
+    Filter,
+    Search,
+    X
 } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import {
@@ -16,6 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,6 +58,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
     const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
     // Extract unique tags and sort them
     const uniqueTags = useMemo(() => {
@@ -72,6 +76,15 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
         if (selectedTags.length > 0) {
             result = result.filter(t =>
                 t.tag && selectedTags.includes(t.tag.toLowerCase())
+            );
+        }
+
+        // Apply Search Filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            result = result.filter(t =>
+                (t.transactionReference?.toLowerCase().includes(query)) ||
+                (t.refNoOrChqNo?.toLowerCase().includes(query))
             );
         }
 
@@ -96,7 +109,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
         }
 
         return result;
-    }, [transactions, sortColumn, sortOrder, selectedTags]);
+    }, [transactions, sortColumn, sortOrder, selectedTags, searchQuery]);
 
     const handleSort = (column: SortColumn) => {
         if (sortColumn === column) {
@@ -146,6 +159,25 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                     <p className="text-xs text-slate-500">
                         Showing {filteredAndSortedTransactions.length} of {transactions.length} transactions
                     </p>
+                </div>
+
+                <div className="relative w-full md:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <Input
+                        placeholder="Search description or ref..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 pr-9 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 text-xs h-9 focus:ring-teal-500/20 focus:border-teal-500"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors"
+                            aria-label="Clear search"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -202,7 +234,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                                                                     />
                                                                     <Badge
                                                                         variant="outline"
-                                                                        className="border-none text-[10px] font-bold px-1.5 py-0"
+                                                                        className="border-none text-[10px] font-normal px-1.5 py-0"
                                                                         style={{
                                                                             backgroundColor: bgColor,
                                                                             color: textColor
@@ -289,7 +321,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                                                 return (
                                                     <Badge
                                                         variant="outline"
-                                                        className="border-none text-xs font-bold px-2 py-0"
+                                                        className="border-none text-xs font-normal px-2 py-0"
                                                         style={{
                                                             backgroundColor: bgColor,
                                                             color: textColor

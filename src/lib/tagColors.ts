@@ -6,6 +6,7 @@ export const tagColors: Record<string, string> = {
     "restaurants": "#FF8A65",      // deep orange
     "food delivery": "#FF7043",    // reddish orange
     "cafe": "#FFA726",             // light orange
+    "bakery": "#FF69B4",           // hot pink / bakery
 
     // Transport
     "fuel": "#4FC3F7",             // light blue
@@ -19,6 +20,7 @@ export const tagColors: Record<string, string> = {
     "electronics": "#9C27B0",      // dark purple
     "home items": "#8E24AA",
     "online shopping": "#AB47BC",
+    "stationery": "#5C6BC0",     // indigo
 
     // Bills
     "electricity": "#FFD54F",      // yellow
@@ -60,6 +62,16 @@ export const tagColors: Record<string, string> = {
     "bank transfer": "#81C784",    // green
     "upi transfer": "#66BB6A",
     "wallet transfer": "#43A047",
+
+    // Cash
+    "cash withdrawal": "#6D4C41",   // deep brown
+
+    // Income
+    "salary": "#4CAF50",    // bright green for income
+
+    // Roofing (new)
+    "roofing": "#8B4513",          // saddle brown / earthy brown
+    "labour": "#FFB300",      // amber / construction yellow
 
     // Others
     "other": "#BDBDBD",
