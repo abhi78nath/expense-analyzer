@@ -17,6 +17,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 function App() {
   const [transactionRows, setTransactionRows] = useState<TransactionRow[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isParsing, setIsParsing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
@@ -30,14 +31,18 @@ function App() {
     }
   }, [location.pathname, transactionRows.length, navigate]);
 
-  const handleAnalyze = async (files: File[], password?: string) => {
+  const handleAnalyze = async (files: File[], password?: string, isAppend: boolean = false) => {
     setIsParsing(true);
     setErrorMessage('');
-    setTransactionRows([]);
-    dispatch(setDateRange(undefined));
+
+    if (!isAppend) {
+      setTransactionRows([]);
+      setUploadedFiles(files);
+      dispatch(setDateRange(undefined));
+    }
 
     try {
-      // Check each file for password protection if not already handled
+      // Check each file for password protection
       for (const file of files) {
         const arrayBuffer = await file.arrayBuffer();
         const loadingTask = pdfjs.getDocument({ data: arrayBuffer, password });
@@ -51,7 +56,7 @@ function App() {
           ) {
             setErrorMessage(`File "${file.name}" is password protected. Please provide the correct password.`);
             setIsParsing(false);
-            return;
+            return false;
           }
           throw pdfError;
         }
@@ -69,8 +74,14 @@ function App() {
         tag: t["tag"] || "other"
       }));
 
-      setTransactionRows(rows);
-      navigate('/dashboard');
+      if (isAppend) {
+        setTransactionRows(prev => [...prev, ...rows]);
+        setUploadedFiles(prev => [...prev, ...files]);
+      } else {
+        setTransactionRows(rows);
+        navigate('/dashboard');
+      }
+      return true;
     } catch (error: any) {
       console.error('Error parsing PDF:', error);
       if (error.message?.includes('401') || error.message?.toLowerCase().includes('password')) {
@@ -78,6 +89,7 @@ function App() {
       } else {
         setErrorMessage(error.message || 'Failed to parse PDF(s).');
       }
+      return false;
     } finally {
       setIsParsing(false);
     }
@@ -85,6 +97,7 @@ function App() {
 
   const handleBackToUpload = () => {
     setTransactionRows([]);
+    setUploadedFiles([]);
     setErrorMessage('');
     dispatch(setDateRange(undefined));
     navigate('/');
@@ -107,7 +120,11 @@ function App() {
         element={
           <DashboardScreen
             transactions={transactionRows}
+            uploadedFiles={uploadedFiles}
             onBackToUpload={handleBackToUpload}
+            onAnalyze={handleAnalyze}
+            isParsing={isParsing}
+            errorMessage={errorMessage}
           />
         }
       />
