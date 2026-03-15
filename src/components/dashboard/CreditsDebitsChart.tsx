@@ -11,8 +11,14 @@ import {
     AreaChart,
     Area,
 } from "recharts";
-import { LayoutGrid, TrendingUp } from "lucide-react";
+import { ChartBarBig, LayoutGrid, TrendingUp } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
+import {
+    Tooltip as UITooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CreditsDebitsChartProps {
     transactions: TransactionRow[];
@@ -150,29 +156,43 @@ const CreditsDebitsChart = ({ transactions }: CreditsDebitsChartProps) => {
                         </div>
                     </div>
 
-                    {/* Toggle */}
-                    <div className="flex h-9 items-center rounded-xl border border-slate-700 bg-slate-900/50 p-1">
-                        <button
-                            onClick={() => setChartType("line")}
-                            className={`flex h-full items-center gap-2 rounded-lg px-3 text-xs font-medium transition-all duration-200 cursor-pointer ${chartType === "line"
-                                ? "bg-slate-700 text-white shadow-sm"
-                                : "text-slate-500 hover:text-slate-300"
-                                }`}
-                        >
-                            <TrendingUp className="h-3.5 w-3.5" />
-                            Line
-                        </button>
-                        <button
-                            onClick={() => setChartType("bar")}
-                            className={`flex h-full items-center gap-2 rounded-lg px-3 text-xs font-medium transition-all duration-200 cursor-pointer ${chartType === "bar"
-                                ? "bg-slate-700 text-white shadow-sm"
-                                : "text-slate-500 hover:text-slate-300"
-                                }`}
-                        >
-                            <LayoutGrid className="h-3.5 w-3.5" />
-                            Bar
-                        </button>
-                    </div>
+                    <TooltipProvider delayDuration={200}>
+                        <div className="flex h-9 items-center rounded-xl border border-slate-700 bg-slate-900/50 p-1">
+                            <UITooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setChartType("line")}
+                                        className={`flex h-full items-center gap-2 rounded-lg px-3 text-xs font-medium transition-all duration-200 cursor-pointer ${chartType === "line"
+                                            ? "bg-slate-700 text-white shadow-sm"
+                                            : "text-slate-500 hover:text-slate-300"
+                                            }`}
+                                    >
+                                        <TrendingUp className="h-3.5 w-3.5" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
+                                    <p>Area View</p>
+                                </TooltipContent>
+                            </UITooltip>
+
+                            <UITooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setChartType("bar")}
+                                        className={`flex h-full items-center gap-2 rounded-lg px-3 text-xs font-medium transition-all duration-200 cursor-pointer ${chartType === "bar"
+                                            ? "bg-slate-700 text-white shadow-sm"
+                                            : "text-slate-500 hover:text-slate-300"
+                                            }`}
+                                    >
+                                        <ChartBarBig className="h-3.5 w-3.5 -scale-x-100 rotate-90" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
+                                    <p>Bar View</p>
+                                </TooltipContent>
+                            </UITooltip>
+                        </div>
+                    </TooltipProvider>
                 </div>
             </div>
 
