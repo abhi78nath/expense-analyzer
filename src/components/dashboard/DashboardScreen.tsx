@@ -14,17 +14,28 @@ import { setDateRange } from "@/shared/redux/features";
 
 interface DashboardScreenProps {
     transactions: TransactionRow[];
+    uploadedFiles: File[];
     onBackToUpload?: () => void;
+    onAnalyze: (files: File[], password?: string, isAppend?: boolean) => Promise<boolean>;
+    isParsing: boolean;
+    errorMessage?: string;
 }
 
-const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps) => {
+const DashboardScreen = ({
+    transactions,
+    uploadedFiles,
+    onBackToUpload,
+    onAnalyze,
+    isParsing,
+    errorMessage
+}: DashboardScreenProps) => {
 
     const dateRange = useSelector((state: RootState) => state.dateRange.dateRange);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // Initialize date range if it's not set and we have transactions
-        if (transactions.length > 0 && !dateRange) {
+        // Initialize or expand date range if we have transactions
+        if (transactions.length > 0) {
             const parseTxnDate = (dateStr: string) => {
                 const [day, month, year] = dateStr.split("-");
                 return new Date(2000 + Number(year), Number(month) - 1, Number(day));
@@ -45,10 +56,16 @@ const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps)
                 const start = startOfMonth(new Date(minTime));
                 const end = endOfMonth(new Date(maxTime));
 
-                dispatch(setDateRange({
-                    from: start,
-                    to: end
-                }));
+                // Only update if the range has actually expanded or wasn't set
+                if (!dateRange || !dateRange.from || !dateRange.to ||
+                    start.getTime() < new Date(dateRange.from).getTime() ||
+                    end.getTime() > new Date(dateRange.to).getTime()) {
+
+                    dispatch(setDateRange({
+                        from: start,
+                        to: end
+                    }));
+                }
             }
         }
     }, [transactions, dateRange, dispatch]);
@@ -80,7 +97,13 @@ const DashboardScreen = ({ transactions, onBackToUpload }: DashboardScreenProps)
     return (
         <SidebarProvider>
             <DashboardLayout>
-                <DashboardHeader onBackToUpload={onBackToUpload} />
+                <DashboardHeader
+                    onBackToUpload={onBackToUpload}
+                    onAnalyze={onAnalyze}
+                    isParsing={isParsing}
+                    errorMessage={errorMessage}
+                    uploadedFiles={uploadedFiles}
+                />
                 <BalanceCardsRow transactions={filteredTransactions} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <div className="lg:col-span-2">

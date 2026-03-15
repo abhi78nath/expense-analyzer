@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "./DateRangePicker";
-
-const periods = ["This Week", "This Month", "Last Month", "Custom"] as const;
+import UploadModal from "../upload/UploadModal";
 
 interface DashboardHeaderProps {
     onBackToUpload?: () => void;
+    onAnalyze: (files: File[], password?: string, isAppend?: boolean) => Promise<boolean>;
+    isParsing: boolean;
+    errorMessage?: string;
+    uploadedFiles: File[];
 }
 
-const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
+const DashboardHeader = ({ onBackToUpload, onAnalyze, isParsing, errorMessage, uploadedFiles }: DashboardHeaderProps) => {
     // const [activePeriod, setActivePeriod] = useState<string>("This Month");
 
     return (
@@ -17,16 +20,24 @@ const DashboardHeader = ({ onBackToUpload }: DashboardHeaderProps) => {
                     <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
                         Dashboard
                     </h1>
-                    {onBackToUpload && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onBackToUpload}
-                            className="h-7 rounded-lg border-slate-700 bg-slate-800/60 px-3 text-xs text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
-                        >
-                            ← New Upload
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {onBackToUpload && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={onBackToUpload}
+                                className="h-8 rounded-lg border-slate-700 bg-slate-800/60 px-3 text-xs text-slate-400 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+                            >
+                                ← New Upload
+                            </Button>
+                        )}
+                        <UploadModal
+                            onAnalyze={onAnalyze}
+                            isLoading={isParsing}
+                            errorMessage={errorMessage}
+                            existingFiles={uploadedFiles}
+                        />
+                    </div>
                 </div>
                 <p className="mt-1 text-sm text-slate-400">
                     Your financial overview at a glance
