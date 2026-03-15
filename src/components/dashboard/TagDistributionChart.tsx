@@ -234,6 +234,8 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                     dataKey="value"
                                     shape={MyCustomPie}
                                     stroke="none"
+                                    startAngle={90}
+                                    endAngle={450}
                                 />
                                 <Pie
                                     data={debitData}
@@ -242,10 +244,13 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                     innerRadius={75}
                                     outerRadius={105}
                                     dataKey="value"
+                                    paddingAngle={3}
                                     label={renderCustomizedLabel}
                                     labelLine={{ stroke: '#334155', strokeWidth: 1 }}
                                     shape={MyCustomPie}
                                     stroke="none"
+                                    startAngle={90}
+                                    endAngle={450}
                                 />
                             </>
                         ) : (
@@ -255,12 +260,14 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                 cy="50%"
                                 innerRadius={0}
                                 outerRadius={100}
-                                paddingAngle={0}
+                                paddingAngle={3}
                                 dataKey="value"
                                 label={renderCustomizedLabel}
                                 labelLine={{ stroke: '#334155', strokeWidth: 1 }}
                                 shape={MyCustomPie}
                                 stroke="none"
+                                startAngle={90}
+                                endAngle={450}
                             />
                         )}
                         <Tooltip content={<CustomTooltip />} />
