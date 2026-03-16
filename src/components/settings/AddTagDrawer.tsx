@@ -77,7 +77,7 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
     return (
         <Drawer open={open} onOpenChange={setOpen} direction="right">
             <DrawerTrigger asChild>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 shadow-lg gap-2">
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 shadow-lg gap-2 cursor-pointer">
                     <Plus className="w-4 h-4" />
                     Add Tag
                 </Button>
@@ -115,16 +115,17 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start">
+                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start" onWheel={e => e.stopPropagation()}>
                                     <Command>
                                         <CommandInput placeholder="Search category..." />
-                                        <CommandList>
+                                        <CommandList className="scrollbar-small">
                                             <CommandEmpty>No category found.</CommandEmpty>
                                             <CommandGroup>
                                                 {categories.map((c) => (
                                                     <CommandItem
                                                         key={c}
                                                         value={c}
+                                                        className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                                                         onSelect={(currentValue) => {
                                                             setCategory(currentValue === category ? "" : currentValue)
                                                             setCategoryOpen(false)
@@ -163,13 +164,14 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                 <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start">
                                     <Command>
                                         <CommandInput placeholder="Search tag..." />
-                                        <CommandList>
+                                        <CommandList className="scrollbar-small">
                                             <CommandEmpty>No tag found.</CommandEmpty>
                                             <CommandGroup>
                                                 {tags.map((t) => (
                                                     <CommandItem
                                                         key={t}
                                                         value={t}
+                                                        className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                                                         onSelect={(currentValue) => {
                                                             setTag(currentValue === tag ? "" : currentValue)
                                                             setTagOpen(false)

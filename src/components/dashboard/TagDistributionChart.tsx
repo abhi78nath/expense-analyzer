@@ -231,6 +231,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                     cy="50%"
                                     innerRadius={0}
                                     outerRadius={65}
+                                    paddingAngle={2}
                                     dataKey="value"
                                     shape={MyCustomPie}
                                     stroke="none"
@@ -244,7 +245,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                     innerRadius={75}
                                     outerRadius={105}
                                     dataKey="value"
-                                    paddingAngle={3}
+                                    paddingAngle={2}
                                     label={renderCustomizedLabel}
                                     labelLine={{ stroke: '#334155', strokeWidth: 1 }}
                                     shape={MyCustomPie}
@@ -260,7 +261,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                                 cy="50%"
                                 innerRadius={0}
                                 outerRadius={100}
-                                paddingAngle={3}
+                                paddingAngle={2}
                                 dataKey="value"
                                 label={renderCustomizedLabel}
                                 labelLine={{ stroke: '#334155', strokeWidth: 1 }}

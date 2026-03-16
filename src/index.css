@@ -114,3 +114,20 @@ body {
     opacity: 0.25;
   }
 }
+
+.scrollbar-small::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-small::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-small::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+.scrollbar-small::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
