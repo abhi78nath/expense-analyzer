@@ -44,3 +44,21 @@ export const getTransactionTags = async (): Promise<any> => {
 
     return response.json();
 };
+
+export const addMerchantRule = async (rule: { merchant: string; category: string; tag: string }): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/merchant-rules`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rule),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add merchant rule');
+    }
+
+    return response.json();
+};
+

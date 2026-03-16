@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { addMerchantRule } from "@/utils/api"
+import { Loader2, AlertCircle } from "lucide-react"
 
 interface MerchantRule {
     merchant: string;
@@ -49,6 +51,9 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
 
     const [categoryOpen, setCategoryOpen] = React.useState(false)
     const [tagOpen, setTagOpen] = React.useState(false)
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [error, setError] = React.useState<string | null>(null)
+
 
     // Extract unique categories and tags from existing rules
     const categories = React.useMemo(() => {
@@ -61,17 +66,28 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
         return Array.from(new Set(rules.map((r) => r.tag))).sort()
     }, [rules])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!merchant || !category || !tag) return
 
-        onAdd({ merchant, category, tag })
+        setIsSubmitting(true)
+        setError(null)
 
-        // Reset form
-        setMerchant("")
-        setCategory("")
-        setTag("")
-        setOpen(false)
+        try {
+            await addMerchantRule({ merchant, category, tag })
+            onAdd({ merchant, category, tag })
+
+            // Reset form
+            setMerchant("")
+            setCategory("")
+            setTag("")
+            setOpen(false)
+        } catch (err: any) {
+            console.error("Failed to add rule:", err)
+            setError(err.message || "Failed to save the rule. Please try again.")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -100,6 +116,14 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                 required
                             />
                         </div>
+
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-xl flex gap-3 text-red-600 dark:text-red-400 text-sm">
+                                <AlertCircle className="w-5 h-5 shrink-0" />
+                                <p>{error}</p>
+                            </div>
+                        )}
+
 
                         <div className="space-y-3 flex flex-col">
                             <Label className="text-sm font-semibold">Category</Label>
@@ -194,8 +218,20 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                         </div>
                     </form>
                     <DrawerFooter className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/10 dark:bg-slate-900/10">
-                        <Button type="submit" onClick={handleSubmit} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 shadow-lg shadow-emerald-500/20 cursor-pointer">
-                            Save Rule
+                        <Button
+                            type="submit"
+                            onClick={handleSubmit}
+                            disabled={isSubmitting || !merchant || !category || !tag}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Rule"
+                            )}
                         </Button>
                         <DrawerClose asChild>
                             <Button variant="outline" className="rounded-xl h-12 cursor-pointer">Cancel</Button>
