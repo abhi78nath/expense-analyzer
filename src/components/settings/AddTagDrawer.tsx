@@ -29,25 +29,40 @@ import {
 } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { addMerchantRule } from "@/utils/api"
+import { addMerchantRule, updateMerchantRule } from "@/utils/api"
 import { Loader2, AlertCircle } from "lucide-react"
-
-interface MerchantRule {
-    merchant: string;
-    category: string;
-    tag: string;
-}
+import type { MerchantRule } from "@/shared/types/merchant"
+import { useToast } from "@/hooks/use-toast"
 
 interface AddTagDrawerProps {
     rules: MerchantRule[] | null;
     onAdd: (rule: MerchantRule) => void;
+    onUpdate: (rule: MerchantRule) => void;
+    initialData?: MerchantRule | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
-    const [open, setOpen] = React.useState(false)
+export function AddTagDrawer({ rules, onAdd, onUpdate, initialData, open: controlledOpen, onOpenChange: setControlledOpen }: AddTagDrawerProps) {
+    const [internalOpen, setInternalOpen] = React.useState(false)
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setOpen = setControlledOpen !== undefined ? setControlledOpen : setInternalOpen;
+    const { toast } = useToast()
     const [merchant, setMerchant] = React.useState("")
     const [category, setCategory] = React.useState("")
     const [tag, setTag] = React.useState("")
+
+    React.useEffect(() => {
+        if (initialData) {
+            setMerchant(initialData.merchant)
+            setCategory(initialData.category)
+            setTag(initialData.tag)
+        } else {
+            setMerchant("")
+            setCategory("")
+            setTag("")
+        }
+    }, [initialData, open])
 
     const [categoryOpen, setCategoryOpen] = React.useState(false)
     const [tagOpen, setTagOpen] = React.useState(false)
@@ -74,8 +89,15 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
         setError(null)
 
         try {
-            await addMerchantRule({ merchant, category, tag })
-            onAdd({ merchant, category, tag })
+            if (initialData?.id) {
+                await updateMerchantRule(initialData.id, { merchant, category, tag })
+                onUpdate({ id: initialData.id, merchant, category, tag })
+            } else {
+                const response = await addMerchantRule({ merchant, category, tag })
+                // The backend might return the new rule with ID, or we fetch again.
+                // For now, let's assume we fetch again or the backend returns it.
+                onAdd({ ...response, merchant, category, tag })
+            }
 
             // Reset form
             setMerchant("")
@@ -83,8 +105,13 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
             setTag("")
             setOpen(false)
         } catch (err: any) {
-            console.error("Failed to add rule:", err)
+            console.error("Failed to save rule:", err)
             setError(err.message || "Failed to save the rule. Please try again.")
+            toast({
+                title: "Error",
+                description: err.message || "Failed to save the rule. Please try again.",
+                variant: "destructive",
+            })
         } finally {
             setIsSubmitting(false)
         }
@@ -101,8 +128,14 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
             <DrawerContent className="h-full">
                 <div className="flex flex-col h-full">
                     <DrawerHeader className="border-b border-slate-100 dark:border-slate-800 pb-6">
-                        <DrawerTitle className="text-xl font-bold">Add Categorization Rule</DrawerTitle>
-                        <DrawerDescription>Create a new rule to automatically tag transactions from a specific merchant.</DrawerDescription>
+                        <DrawerTitle className="text-xl font-bold">
+                            {initialData ? "Edit Categorization Rule" : "Add Categorization Rule"}
+                        </DrawerTitle>
+                        <DrawerDescription>
+                            {initialData
+                                ? "Update the rule to change how transactions are tagged."
+                                : "Create a new rule to automatically tag transactions from a specific merchant."}
+                        </DrawerDescription>
                     </DrawerHeader>
                     <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
                         <div className="space-y-3">
@@ -185,7 +218,7 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start">
+                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start" onWheel={e => e.stopPropagation()}>
                                     <Command>
                                         <CommandInput placeholder="Search tag..." />
                                         <CommandList className="scrollbar-small">

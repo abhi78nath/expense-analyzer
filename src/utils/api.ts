@@ -61,4 +61,32 @@ export const addMerchantRule = async (rule: { merchant: string; category: string
 
     return response.json();
 };
+export const updateMerchantRule = async (id: number, rule: { merchant: string; category: string; tag: string }): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/merchant-rules/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rule),
+    });
 
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update merchant rule');
+    }
+
+    return response.json();
+};
+
+export const deleteMerchantRule = async (id: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/merchant-rules/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete merchant rule');
+    }
+
+    return response.json();
+};

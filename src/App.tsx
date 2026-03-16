@@ -9,6 +9,7 @@ import DashboardScreen from './components/dashboard/DashboardScreen';
 import { parsePdfWithPython } from './utils/api';
 import type { TransactionRow } from './utils/textParser';
 import SettingsScreen from './components/settings/SettingsScreen';
+import { Toaster } from "@/components/ui/toaster"
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -104,37 +105,40 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <UploadScreen
-            onAnalyze={handleAnalyze}
-            isLoading={isParsing}
-            errorMessage={errorMessage}
-          />
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <DashboardScreen
-            transactions={transactionRows}
-            uploadedFiles={uploadedFiles}
-            onBackToUpload={handleBackToUpload}
-            onAnalyze={handleAnalyze}
-            isParsing={isParsing}
-            errorMessage={errorMessage}
-          />
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <SettingsScreen onBack={handleBackToUpload} />
-        }
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <UploadScreen
+              onAnalyze={handleAnalyze}
+              isLoading={isParsing}
+              errorMessage={errorMessage}
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardScreen
+              transactions={transactionRows}
+              uploadedFiles={uploadedFiles}
+              onBackToUpload={handleBackToUpload}
+              onAnalyze={handleAnalyze}
+              isParsing={isParsing}
+              errorMessage={errorMessage}
+            />
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <SettingsScreen onBack={handleBackToUpload} />
+          }
+        />
+      </Routes>
+      <Toaster />
+    </>
   );
 }
 
