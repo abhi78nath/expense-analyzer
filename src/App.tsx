@@ -5,6 +5,7 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import UploadScreen from './components/upload/UploadScreen';
 import DashboardScreen from './components/dashboard/DashboardScreen';
 import SettingsScreen from './components/settings/SettingsScreen';
+import AuthPage from './components/auth/AuthPage';
 import { Toaster } from "@/components/ui/toaster"
 import { useExpenseAnalysis } from './hooks/useExpenseAnalysis';
 
@@ -59,12 +60,11 @@ function App() {
             />
           }
         />
-        <Route
-          path="/settings"
-          element={
-            <SettingsScreen onBack={handleBackToUpload} />
-          }
-        />
+        <Route path="/settings" element={<SettingsScreen onBack={handleBackToUpload} />} />
+        <Route path="/login" element={<AuthPage mode="sign-in" />} />
+        <Route path="/login/*" element={<AuthPage mode="sign-in" />} />
+        <Route path="/signup" element={<AuthPage mode="sign-up" />} />
+        <Route path="/signup/*" element={<AuthPage mode="sign-up" />} />
       </Routes>
       <Toaster />
     </>

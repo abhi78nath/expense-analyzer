@@ -5,6 +5,7 @@ import AnimatedBackground from "./AnimatedBackground";
 import AppLogo from "./AppLogo";
 import type { PasswordInputHandle } from "./PasswordInput";
 import UploadForm from "./UploadForm";
+import Navbar from "../layout/Navbar";
 
 interface UploadScreenProps {
     onAnalyze: (files: File[], password?: string) => void;
@@ -72,8 +73,9 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
     };
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center px-4 py-8">
+        <div className="relative flex min-h-screen items-center justify-center px-4 py-8 pt-24">
             <AnimatedBackground />
+            <Navbar />
 
             <div className="w-full max-w-md">
                 {/* Logo + Title */}
