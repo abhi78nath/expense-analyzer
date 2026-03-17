@@ -29,26 +29,46 @@ import {
 } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-interface MerchantRule {
-    merchant: string;
-    category: string;
-    tag: string;
-}
+import { addMerchantRule, updateMerchantRule } from "@/utils/api"
+import { Loader2, AlertCircle } from "lucide-react"
+import type { MerchantRule } from "@/shared/types/merchant"
+import { useToast } from "@/hooks/use-toast"
 
 interface AddTagDrawerProps {
     rules: MerchantRule[] | null;
     onAdd: (rule: MerchantRule) => void;
+    onUpdate: (rule: MerchantRule) => void;
+    initialData?: MerchantRule | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
-    const [open, setOpen] = React.useState(false)
+export function AddTagDrawer({ rules, onAdd, onUpdate, initialData, open: controlledOpen, onOpenChange: setControlledOpen }: AddTagDrawerProps) {
+    const [internalOpen, setInternalOpen] = React.useState(false)
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setOpen = setControlledOpen !== undefined ? setControlledOpen : setInternalOpen;
+    const { toast } = useToast()
     const [merchant, setMerchant] = React.useState("")
     const [category, setCategory] = React.useState("")
     const [tag, setTag] = React.useState("")
 
+    React.useEffect(() => {
+        if (initialData) {
+            setMerchant(initialData.merchant)
+            setCategory(initialData.category)
+            setTag(initialData.tag)
+        } else {
+            setMerchant("")
+            setCategory("")
+            setTag("")
+        }
+    }, [initialData, open])
+
     const [categoryOpen, setCategoryOpen] = React.useState(false)
     const [tagOpen, setTagOpen] = React.useState(false)
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [error, setError] = React.useState<string | null>(null)
+
 
     // Extract unique categories and tags from existing rules
     const categories = React.useMemo(() => {
@@ -61,17 +81,40 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
         return Array.from(new Set(rules.map((r) => r.tag))).sort()
     }, [rules])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!merchant || !category || !tag) return
 
-        onAdd({ merchant, category, tag })
+        setIsSubmitting(true)
+        setError(null)
 
-        // Reset form
-        setMerchant("")
-        setCategory("")
-        setTag("")
-        setOpen(false)
+        try {
+            if (initialData?.id) {
+                await updateMerchantRule(initialData.id, { merchant, category, tag })
+                onUpdate({ id: initialData.id, merchant, category, tag })
+            } else {
+                const response = await addMerchantRule({ merchant, category, tag })
+                // The backend might return the new rule with ID, or we fetch again.
+                // For now, let's assume we fetch again or the backend returns it.
+                onAdd({ ...response, merchant, category, tag })
+            }
+
+            // Reset form
+            setMerchant("")
+            setCategory("")
+            setTag("")
+            setOpen(false)
+        } catch (err: any) {
+            console.error("Failed to save rule:", err)
+            setError(err.message || "Failed to save the rule. Please try again.")
+            toast({
+                title: "Error",
+                description: err.message || "Failed to save the rule. Please try again.",
+                variant: "destructive",
+            })
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -85,8 +128,14 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
             <DrawerContent className="h-full">
                 <div className="flex flex-col h-full">
                     <DrawerHeader className="border-b border-slate-100 dark:border-slate-800 pb-6">
-                        <DrawerTitle className="text-xl font-bold">Add Categorization Rule</DrawerTitle>
-                        <DrawerDescription>Create a new rule to automatically tag transactions from a specific merchant.</DrawerDescription>
+                        <DrawerTitle className="text-xl font-bold">
+                            {initialData ? "Edit Categorization Rule" : "Add Categorization Rule"}
+                        </DrawerTitle>
+                        <DrawerDescription>
+                            {initialData
+                                ? "Update the rule to change how transactions are tagged."
+                                : "Create a new rule to automatically tag transactions from a specific merchant."}
+                        </DrawerDescription>
                     </DrawerHeader>
                     <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
                         <div className="space-y-3">
@@ -100,6 +149,14 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                 required
                             />
                         </div>
+
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-xl flex gap-3 text-red-600 dark:text-red-400 text-sm">
+                                <AlertCircle className="w-5 h-5 shrink-0" />
+                                <p>{error}</p>
+                            </div>
+                        )}
+
 
                         <div className="space-y-3 flex flex-col">
                             <Label className="text-sm font-semibold">Category</Label>
@@ -161,7 +218,7 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start">
+                                <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900" align="start" onWheel={e => e.stopPropagation()}>
                                     <Command>
                                         <CommandInput placeholder="Search tag..." />
                                         <CommandList className="scrollbar-small">
@@ -194,8 +251,20 @@ export function AddTagDrawer({ rules, onAdd }: AddTagDrawerProps) {
                         </div>
                     </form>
                     <DrawerFooter className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/10 dark:bg-slate-900/10">
-                        <Button type="submit" onClick={handleSubmit} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 shadow-lg shadow-emerald-500/20 cursor-pointer">
-                            Save Rule
+                        <Button
+                            type="submit"
+                            onClick={handleSubmit}
+                            disabled={isSubmitting || !merchant || !category || !tag}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Rule"
+                            )}
                         </Button>
                         <DrawerClose asChild>
                             <Button variant="outline" className="rounded-xl h-12 cursor-pointer">Cancel</Button>

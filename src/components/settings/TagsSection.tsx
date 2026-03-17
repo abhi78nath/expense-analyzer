@@ -1,5 +1,5 @@
-import React from 'react';
-import { Tag, AlertCircle, Loader2 } from 'lucide-react';
+import { Tag, AlertCircle, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -10,20 +10,17 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { tagColors } from '@/lib/tagColors';
-
-interface MerchantRule {
-    merchant: string;
-    category: string;
-    tag: string;
-}
+import type { MerchantRule } from '@/shared/types/merchant';
 
 interface TagsSectionProps {
     rules: MerchantRule[] | null;
     loading: boolean;
     error: string | null;
+    onEdit: (rule: MerchantRule) => void;
+    onDelete: (id: number) => void;
 }
 
-const TagsSection = ({ rules, loading, error }: TagsSectionProps) => {
+const TagsSection = ({ rules, loading, error, onEdit, onDelete }: TagsSectionProps) => {
     const getTagColor = (tagName: string) => {
         const color = tagColors[tagName.toLowerCase()] || tagColors["other"];
         return color;
@@ -66,6 +63,7 @@ const TagsSection = ({ rules, loading, error }: TagsSectionProps) => {
                                 <TableHead className="w-[40%] font-bold text-slate-900 dark:text-white py-4">Merchant</TableHead>
                                 <TableHead className="font-bold text-slate-900 dark:text-white py-4">Category</TableHead>
                                 <TableHead className="font-bold text-slate-900 dark:text-white py-4">Default Tag</TableHead>
+                                <TableHead className="font-bold text-slate-900 dark:text-white py-4 text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -74,7 +72,7 @@ const TagsSection = ({ rules, loading, error }: TagsSectionProps) => {
                                 return (
                                     <TableRow
                                         key={`${rule.merchant}-${index}`}
-                                        className="group border-slate-100 dark:border-slate-800/50 hover:bg-emerald-500/[0.02] transition-colors"
+                                        className="group border-slate-100 dark:border-slate-800/50 hover:bg-emerald-500/5 transition-colors"
                                     >
                                         <TableCell className="py-4">
                                             <div className="flex items-center gap-3">
@@ -99,6 +97,26 @@ const TagsSection = ({ rules, loading, error }: TagsSectionProps) => {
                                             >
                                                 {rule.tag}
                                             </Badge>
+                                        </TableCell>
+                                        <TableCell className="py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => onEdit(rule)}
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors cursor-pointer"
+                                                    onClick={() => onDelete(rule.id)}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 );
