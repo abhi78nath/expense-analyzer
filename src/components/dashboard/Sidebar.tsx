@@ -191,10 +191,10 @@ const Sidebar = () => {
                         appearance={{
                             elements: {
                                 userButtonBox: "!flex-row-reverse w-full justify-end",
-                                userButtonTrigger: "hover:shadow-none shadow-none focus:shadow-none bg-transparent",
-                                // userButtonAvatarBox: "h-9 w-9",
-                                // userButtonOuterIdentifier: "text-slate-300 font-medium pl-2",
-                                // userButtonPopoverCard: "bg-slate-900 border border-slate-700 shadow-xl shadow-black/50"
+                                userButtonTrigger: "hover:!shadow-none !shadow-none focus:!shadow-none bg-transparent",
+                                userButtonAvatarBox: "h-9 w-9",
+                                userButtonOuterIdentifier: "text-slate-300 font-medium pl-2",
+                                userButtonPopoverCard: "bg-slate-900 border border-slate-700 shadow-xl shadow-black/50",
                             },
                             variables: {
                                 colorBackground: "#0f172a",
