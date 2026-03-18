@@ -33,3 +33,39 @@ pre {
   padding: 1rem;
   border-radius: 8px;
 }
+
+:root {
+  --clerk-color-primary: #10b981;
+  --clerk-color-primary-foreground: #ffffff;
+  --clerk-color-danger: #ef4444;
+  --clerk-color-success: #10b981;
+  --clerk-color-warning: #f59e0b;
+  --clerk-color-neutral: #94a3b8;
+  --clerk-color-foreground: #ffffff;
+  --clerk-color-muted-foreground: #94a3b8;
+  --clerk-color-background: transparent;
+  --clerk-color-input: rgba(30, 41, 59, 0.6);
+  --clerk-color-input-foreground: #ffffff;
+  --clerk-color-ring: #10b981;
+  --clerk-color-shimmer: rgba(255, 255, 255, 0.1);
+  --clerk-color-modal-backdrop: rgba(15, 23, 42, 0.8);
+  --clerk-spacing: 1rem;
+}
+
+.dark {
+  --clerk-color-primary: #10b981;
+  --clerk-color-primary-foreground: #ffffff;
+  --clerk-color-danger: #ef4444;
+  --clerk-color-success: #10b981;
+  --clerk-color-warning: #f59e0b;
+  --clerk-color-neutral: #94a3b8;
+  --clerk-color-foreground: #ffffff;
+  --clerk-color-muted-foreground: #94a3b8;
+  --clerk-color-background: transparent;
+  --clerk-color-input: rgba(30, 41, 59, 0.6);
+  --clerk-color-input-foreground: #ffffff;
+  --clerk-color-ring: #10b981;
+  --clerk-color-shimmer: rgba(255, 255, 255, 0.1);
+  --clerk-color-modal-backdrop: rgba(15, 23, 42, 0.8);
+  --clerk-spacing: 1rem;
+}

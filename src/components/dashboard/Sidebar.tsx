@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarContext";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { UserButton } from "@clerk/react";
 
 const navItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -181,6 +182,25 @@ const Sidebar = () => {
                             </Button>
                         );
                     })}
+                </div>
+
+                {/* User Profile Footer */}
+                <div className={`mt-auto border-t border-slate-800 px-3 py-4 flex items-center ${isOpen ? "justify-start px-3" : "justify-center"}`}>
+                    <UserButton
+                        showName={isOpen}
+                        appearance={{
+                            elements: {
+                                userButtonBox: "!flex-row-reverse w-full justify-end",
+                                userButtonTrigger: "hover:!shadow-none !shadow-none focus:!shadow-none bg-transparent",
+                                userButtonAvatarBox: "h-9 w-9",
+                                userButtonOuterIdentifier: "text-slate-300 font-medium pl-2",
+                                userButtonPopoverCard: "bg-slate-900 border border-slate-700 shadow-xl shadow-black/50",
+                            },
+                            variables: {
+                                colorBackground: "#0f172a",
+                            }
+                        }}
+                    />
                 </div>
             </aside>
         </>
