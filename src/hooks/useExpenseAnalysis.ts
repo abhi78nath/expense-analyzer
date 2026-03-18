@@ -8,6 +8,16 @@ import { parsePdfWithPython } from '../utils/api';
 import { saveStatementRecord, type StatementRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
+// At the top of useExpenseAnalysis.ts, before the hook
+declare global {
+    interface Window {
+        Clerk?: {
+            user?: {
+                id?: string;
+            };
+        };
+    }
+}
 export const useExpenseAnalysis = () => {
     const [transactionRows, setTransactionRows] = useState<TransactionRow[]>([]);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -15,9 +25,9 @@ export const useExpenseAnalysis = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { userId } = useAuth();
 
     const handleAnalyze = async (files: File[], password?: string, isAppend: boolean = false) => {
+        const currentUserId = window.Clerk?.user?.id ?? null;
         setIsParsing(true);
         setErrorMessage('');
 
@@ -48,7 +58,7 @@ export const useExpenseAnalysis = () => {
                 }
             }
 
-            const response = await parsePdfWithPython(files, userId, password);
+            const response = await parsePdfWithPython(files, currentUserId, password);
 
             const rows: TransactionRow[] = response.transactions.map((t: any) => ({
                 date: String(t["date"] || ""),
@@ -60,7 +70,7 @@ export const useExpenseAnalysis = () => {
                 tag: t["tag"] || "other"
             }));
 
-            if (userId && response.metadata?.pdfs) {
+            if (currentUserId && response.metadata?.pdfs) {
                 for (const pdf of response.metadata.pdfs as any[]) {
                     const pdfTxns = response.transactions.filter((t: any) => t.pdf_id === pdf.id);
                     if (pdfTxns.length === 0) continue;
@@ -91,7 +101,7 @@ export const useExpenseAnalysis = () => {
 
                     const record: StatementRecord = {
                         id: pdf.id,
-                        userId: userId,
+                        userId: currentUserId,
                         fileName: pdf.filename,
                         uploadedAt: new Date().toISOString(),
                         bankName,

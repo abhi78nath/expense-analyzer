@@ -8,9 +8,11 @@ import RecentTransactions from "./RecentTransactions";
 import type { TransactionRow } from "@/utils/textParser";
 import type { RootState } from "@/shared/redux/store";
 import { useSelector, useDispatch } from "react-redux";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, memo } from "react";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { setDateRange } from "@/shared/redux/features";
+import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardScreenProps {
     transactions: TransactionRow[];
@@ -21,17 +23,17 @@ interface DashboardScreenProps {
     errorMessage?: string;
 }
 
-const DashboardScreen = ({
-    transactions,
-    uploadedFiles,
-    onBackToUpload,
-    onAnalyze,
-    isParsing,
-    errorMessage
-}: DashboardScreenProps) => {
-
+const DashboardScreen = memo(() => {
+    const { transactionRows: transactions, uploadedFiles, handleAnalyze, isParsing, errorMessage, handleBackToUpload } = useExpenseAnalysisContext();
     const dateRange = useSelector((state: RootState) => state.dateRange.dateRange);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.pathname === '/dashboard' && transactions.length === 0) {
+            navigate('/', { replace: true });
+        }
+    }, [location.pathname, transactions.length, navigate]);
 
     useEffect(() => {
         // Initialize or expand date range if we have transactions
@@ -93,13 +95,15 @@ const DashboardScreen = ({
 
     }, [dateRange, transactions]);
 
+    const stableTransactions = useMemo(() => filteredTransactions, [filteredTransactions]);
+
     console.log(filteredTransactions, 'filteredTransactions')
     return (
         <SidebarProvider>
             <DashboardLayout>
                 <DashboardHeader
-                    onBackToUpload={onBackToUpload}
-                    onAnalyze={onAnalyze}
+                    onBackToUpload={handleBackToUpload}
+                    onAnalyze={handleAnalyze}
                     isParsing={isParsing}
                     errorMessage={errorMessage}
                     uploadedFiles={uploadedFiles}
@@ -110,13 +114,13 @@ const DashboardScreen = ({
                         <CreditsDebitsChart transactions={filteredTransactions} />
                     </div>
                     <div className="lg:col-span-1">
-                        <TagDistributionChart transactions={filteredTransactions} />
+                        <TagDistributionChart transactions={stableTransactions} />
                     </div>
                 </div>
                 <RecentTransactions transactions={filteredTransactions} />
             </DashboardLayout>
         </SidebarProvider>
     );
-};
+});
 
 export default DashboardScreen;

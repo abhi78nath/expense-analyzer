@@ -26,12 +26,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useExpenseAnalysisContext } from '../providers/ExpenseAnalysisProvider';
 
-interface SettingsScreenProps {
-    onBack: () => void;
-}
-
-const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
+const SettingsScreen = () => {
+    const { handleBackToUpload } = useExpenseAnalysisContext();
     const [activeTab, setActiveTab] = useState<'tags' | 'profile'>('tags');
     const [rules, setRules] = useState<MerchantRule[] | null>(null);
     const [loading, setLoading] = useState(true);
@@ -137,7 +135,7 @@ const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={onBack}
+                                onClick={handleBackToUpload}
                                 className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 gap-2 font-semibold"
                             >
                                 <ArrowLeft className="w-4 h-4" />
