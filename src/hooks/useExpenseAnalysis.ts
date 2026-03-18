@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { pdfjs } from 'react-pdf';
+import { useAuth } from '@clerk/react';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
 import type { TransactionRow } from '../utils/textParser';
@@ -13,6 +14,7 @@ export const useExpenseAnalysis = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { userId } = useAuth();
 
     const handleAnalyze = async (files: File[], password?: string, isAppend: boolean = false) => {
         setIsParsing(true);
@@ -45,7 +47,7 @@ export const useExpenseAnalysis = () => {
                 }
             }
 
-            const response = await parsePdfWithPython(files, password);
+            const response = await parsePdfWithPython(files, userId, password);
 
             const rows: TransactionRow[] = response.transactions.map((t: any) => ({
                 date: String(t["date"] || ""),
