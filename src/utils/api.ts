@@ -5,6 +5,7 @@ export interface ParseResponse {
     metadata: {
         file_count: number;
         total_size: number;
+        pdfs?: { id: string; filename: string }[];
     };
 }
 

@@ -5,6 +5,7 @@ import { pdfjs } from 'react-pdf';
 import { useAuth } from '@clerk/react';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
+import { saveStatementRecord, type StatementRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
 export const useExpenseAnalysis = () => {
@@ -58,6 +59,51 @@ export const useExpenseAnalysis = () => {
                 balance: typeof t["balance"] === "number" ? t["balance"] : null,
                 tag: t["tag"] || "other"
             }));
+
+            if (userId && response.metadata?.pdfs) {
+                for (const pdf of response.metadata.pdfs as any[]) {
+                    const pdfTxns = response.transactions.filter((t: any) => t.pdf_id === pdf.id);
+                    if (pdfTxns.length === 0) continue;
+
+                    let totalCredit = 0;
+                    let totalDebit = 0;
+                    const dates: string[] = [];
+
+                    pdfTxns.forEach((t: any) => {
+                        if (typeof t.credit === 'number') totalCredit += t.credit;
+                        if (typeof t.debit === 'number') totalDebit += t.debit;
+                        // Some basic parse mapping: date strings need to be uniform
+                        if (t.date) dates.push(t.date);
+                    });
+
+                    // Very simple string sort, assumes date strings are parseable
+                    dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+                    const periodStart = dates[0] || '';
+                    const periodEnd = dates[dates.length - 1] || '';
+
+                    // Try to guess a bank name from filename or default to Unknown
+                    const bankNameLower = pdf.filename.toLowerCase();
+                    let bankName = 'Unknown Bank';
+                    if (bankNameLower.includes('hdfc')) bankName = 'HDFC';
+                    else if (bankNameLower.includes('sbi')) bankName = 'SBI';
+                    else if (bankNameLower.includes('icici')) bankName = 'ICICI';
+                    else if (bankNameLower.includes('axis')) bankName = 'Axis Bank';
+
+                    const record: StatementRecord = {
+                        id: pdf.id,
+                        userId: userId,
+                        fileName: pdf.filename,
+                        uploadedAt: new Date().toISOString(),
+                        bankName,
+                        periodStart,
+                        periodEnd,
+                        totalCredit,
+                        totalDebit,
+                        currency: 'INR'
+                    };
+                    saveStatementRecord(record).catch(err => console.error("Error saving statement to DB", err));
+                }
+            }
 
             if (isAppend) {
                 setTransactionRows(prev => [...prev, ...rows]);
