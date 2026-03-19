@@ -3,6 +3,8 @@ export interface ParseResponse {
     total_transactions: number;
     transactions: any[];
     metadata: {
+        bank_name: string;
+        ifsc_code: string;
         file_count: number;
         total_size: number;
         pdfs?: { id: string; filename: string }[];

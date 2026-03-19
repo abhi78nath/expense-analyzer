@@ -5,7 +5,7 @@ import { pdfjs } from 'react-pdf';
 import { useAuth } from '@clerk/react';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
-import { saveStatementRecord, type StatementRecord } from '../utils/db';
+import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, type StatementRecord, type TransactionRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
 // At the top of useExpenseAnalysis.ts, before the hook
@@ -92,26 +92,43 @@ export const useExpenseAnalysis = () => {
                     const periodEnd = dates[dates.length - 1] || '';
 
                     // Try to guess a bank name from filename or default to Unknown
-                    const bankNameLower = pdf.filename.toLowerCase();
-                    let bankName = 'Unknown Bank';
-                    if (bankNameLower.includes('hdfc')) bankName = 'HDFC';
-                    else if (bankNameLower.includes('sbi')) bankName = 'SBI';
-                    else if (bankNameLower.includes('icici')) bankName = 'ICICI';
-                    else if (bankNameLower.includes('axis')) bankName = 'Axis Bank';
+                    // const bankNameLower = pdf.filename.toLowerCase();
+                    // let bankName = 'Unknown Bank';
+                    // if (bankNameLower.includes('hdfc')) bankName = 'HDFC';
+                    // else if (bankNameLower.includes('sbi')) bankName = 'SBI';
+                    // else if (bankNameLower.includes('icici')) bankName = 'ICICI';
+                    // else if (bankNameLower.includes('axis')) bankName = 'Axis Bank';
+                    let bankName = response.metadata?.bank_name || "Unknown Bank";
+                    const duplicate = await findDuplicateStatement(
+                        currentUserId,
+                        bankName,
+                        periodStart,
+                        periodEnd
+                    );
 
+                    if (duplicate) {
+                        console.warn(`[upload] Duplicate statement skipped: ${pdf.filename}`);
+                        continue; // skip this PDF, process remaining files
+                    }
                     const record: StatementRecord = {
                         id: pdf.id,
                         userId: currentUserId,
                         fileName: pdf.filename,
                         uploadedAt: new Date().toISOString(),
-                        bankName,
+                        bankName: bankName,
                         periodStart,
                         periodEnd,
                         totalCredit,
                         totalDebit,
                         currency: 'INR'
                     };
-                    saveStatementRecord(record).catch(err => console.error("Error saving statement to DB", err));
+                    await saveStatementRecord(record).catch(err => console.error("Error saving statement to DB", err));
+
+                    const transactions: TransactionRecord[] = pdfTxns.map((t: any) =>
+                        mapToTransactionRecord(t, currentUserId, pdf.id)
+                    );
+
+                    await saveTransactions(transactions);
                 }
             }
 
@@ -153,3 +170,4 @@ export const useExpenseAnalysis = () => {
         handleBackToUpload
     };
 };
+
