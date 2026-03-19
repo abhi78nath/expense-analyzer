@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { pdfjs } from 'react-pdf';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
+import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, getAllTransactions, type StatementRecord, type TransactionRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
+// At the top of useExpenseAnalysis.ts, before the hook
+declare global {
+    interface Window {
+        Clerk?: {
+            user?: {
+                id?: string;
+            };
+        };
+    }
+}
 export const useExpenseAnalysis = () => {
     const [transactionRows, setTransactionRows] = useState<TransactionRow[]>([]);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -13,8 +24,35 @@ export const useExpenseAnalysis = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const loadOfflineData = useCallback(async (currentUserId: string) => {
+        try {
+            const dbTxns = await getAllTransactions(currentUserId);
+            if (dbTxns && dbTxns.length > 0) {
+                const mapped: TransactionRow[] = dbTxns.map(t => ({
+                    id: t.id,
+                    date: (() => {
+                        // Convert YYYY-MM-DD back to DD-MM-YY
+                        const [yyyy, mm, dd] = t.date.split("-");
+                        return `${dd}-${mm}-${yyyy.slice(2)}`;
+                    })(),
+                    transactionReference: t.description,
+                    refNoOrChqNo: "",
+                    credit: t.type === "credit" ? t.amount : null,
+                    debit: t.type === "debit" ? t.amount : null,
+                    balance: t.balance,
+                    tag: t.tag || "other"
+                }));
+                setTransactionRows(mapped);
+                return true;
+            }
+        } catch (err) {
+            console.error("Error loading offline data", err);
+        }
+        return false;
+    }, []);
 
     const handleAnalyze = async (files: File[], password?: string, isAppend: boolean = false) => {
+        const currentUserId = window.Clerk?.user?.id ?? null;
         setIsParsing(true);
         setErrorMessage('');
 
@@ -45,9 +83,10 @@ export const useExpenseAnalysis = () => {
                 }
             }
 
-            const response = await parsePdfWithPython(files, password);
+            const response = await parsePdfWithPython(files, currentUserId, password);
 
             const rows: TransactionRow[] = response.transactions.map((t: any) => ({
+                id: t.id || crypto.randomUUID(),
                 date: String(t["date"] || ""),
                 transactionReference: String(t["transaction reference"] || ""),
                 refNoOrChqNo: String(t["ref.no/chq.no"] || ""),
@@ -56,6 +95,68 @@ export const useExpenseAnalysis = () => {
                 balance: typeof t["balance"] === "number" ? t["balance"] : null,
                 tag: t["tag"] || "other"
             }));
+
+            if (currentUserId && response.metadata?.pdfs) {
+                for (const pdf of response.metadata.pdfs as any[]) {
+                    const pdfTxns = response.transactions.filter((t: any) => t.pdf_id === pdf.id);
+                    if (pdfTxns.length === 0) continue;
+
+                    let totalCredit = 0;
+                    let totalDebit = 0;
+                    const dates: string[] = [];
+
+                    pdfTxns.forEach((t: any) => {
+                        if (typeof t.credit === 'number') totalCredit += t.credit;
+                        if (typeof t.debit === 'number') totalDebit += t.debit;
+                        // Some basic parse mapping: date strings need to be uniform
+                        if (t.date) dates.push(t.date);
+                    });
+
+                    // Very simple string sort, assumes date strings are parseable
+                    dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+                    const periodStart = dates[0] || '';
+                    const periodEnd = dates[dates.length - 1] || '';
+
+                    // Try to guess a bank name from filename or default to Unknown
+                    // const bankNameLower = pdf.filename.toLowerCase();
+                    // let bankName = 'Unknown Bank';
+                    // if (bankNameLower.includes('hdfc')) bankName = 'HDFC';
+                    // else if (bankNameLower.includes('sbi')) bankName = 'SBI';
+                    // else if (bankNameLower.includes('icici')) bankName = 'ICICI';
+                    // else if (bankNameLower.includes('axis')) bankName = 'Axis Bank';
+                    let bankName = response.metadata?.bank_name || "Unknown Bank";
+                    const duplicate = await findDuplicateStatement(
+                        currentUserId,
+                        bankName,
+                        periodStart,
+                        periodEnd
+                    );
+
+                    if (duplicate) {
+                        console.warn(`[upload] Duplicate statement skipped: ${pdf.filename}`);
+                        continue; // skip this PDF, process remaining files
+                    }
+                    const record: StatementRecord = {
+                        id: pdf.id,
+                        userId: currentUserId,
+                        fileName: pdf.filename,
+                        uploadedAt: new Date().toISOString(),
+                        bankName: bankName,
+                        periodStart,
+                        periodEnd,
+                        totalCredit,
+                        totalDebit,
+                        currency: 'INR'
+                    };
+                    await saveStatementRecord(record).catch(err => console.error("Error saving statement to DB", err));
+
+                    const transactions: TransactionRecord[] = pdfTxns.map((t: any) =>
+                        mapToTransactionRecord(t, currentUserId, pdf.id)
+                    );
+
+                    await saveTransactions(transactions);
+                }
+            }
 
             if (isAppend) {
                 setTransactionRows(prev => [...prev, ...rows]);
@@ -92,6 +193,8 @@ export const useExpenseAnalysis = () => {
         isParsing,
         errorMessage,
         handleAnalyze,
-        handleBackToUpload
+        handleBackToUpload,
+        loadOfflineData
     };
 };
+

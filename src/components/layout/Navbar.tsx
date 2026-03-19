@@ -1,11 +1,24 @@
-import { UserButton } from "@clerk/react";
-import { useAuth } from "@clerk/react";
+import { UserButton, useAuth } from "@clerk/react";
 import { BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getStatementRecordsByUserId } from "../../utils/db";
 
 const Navbar = () => {
     const navigate = useNavigate();
     const { isSignedIn } = useAuth();
+    const [hasData, setHasData] = useState(false);
+
+    useEffect(() => {
+        const currentUserId = window.Clerk?.user?.id;
+        if (isSignedIn && currentUserId) {
+            getStatementRecordsByUserId(currentUserId)
+                .then(records => setHasData(records.length > 0))
+                .catch(console.error);
+        } else {
+            setHasData(false);
+        }
+    }, [isSignedIn]);
 
     return (
         <nav
@@ -38,13 +51,23 @@ const Navbar = () => {
             {/* Right: Auth Controls */}
             <div className="flex items-center gap-3">
                 {isSignedIn ? (
-                    <UserButton
-                        appearance={{
-                            elements: {
-                                userButtonAvatarBox: "h-9 w-9 border border-slate-700/60",
-                            },
-                        }}
-                    />
+                    <>
+                        {hasData && (
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
+                            >
+                                Dashboard
+                            </button>
+                        )}
+                        <UserButton
+                            appearance={{
+                                elements: {
+                                    userButtonAvatarBox: "h-9 w-9 border border-slate-700/60",
+                                },
+                            }}
+                        />
+                    </>
                 ) : (
                     <>
                         <button

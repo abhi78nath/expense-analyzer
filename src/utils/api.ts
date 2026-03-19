@@ -3,18 +3,25 @@ export interface ParseResponse {
     total_transactions: number;
     transactions: any[];
     metadata: {
+        bank_name: string;
+        ifsc_code: string;
         file_count: number;
         total_size: number;
+        pdfs?: { id: string; filename: string }[];
     };
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const parsePdfWithPython = async (files: File[], password?: string): Promise<ParseResponse> => {
+export const parsePdfWithPython = async (files: File[], userId?: string | null, password?: string): Promise<ParseResponse> => {
     const formData = new FormData();
     files.forEach(file => {
         formData.append('files', file);
     });
+
+    if (userId) {
+        formData.append('user_id', userId);
+    }
 
     if (password) {
         formData.append('password', password);

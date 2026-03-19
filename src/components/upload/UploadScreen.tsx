@@ -6,6 +6,7 @@ import AppLogo from "./AppLogo";
 import type { PasswordInputHandle } from "./PasswordInput";
 import UploadForm from "./UploadForm";
 import Navbar from "../layout/Navbar";
+import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider";
 
 interface UploadScreenProps {
     onAnalyze: (files: File[], password?: string) => void;
@@ -13,7 +14,9 @@ interface UploadScreenProps {
     errorMessage?: string;
 }
 
-const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps) => {
+const UploadScreen = () => {
+
+    const { handleAnalyze, isParsing, errorMessage } = useExpenseAnalysisContext();
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [password, setPassword] = useState("");
     const [isCheckingPassword, setIsCheckingPassword] = useState(false);
@@ -66,10 +69,10 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
         }
     };
 
-    const handleAnalyze = (e?: React.BaseSyntheticEvent) => {
+    const handleSubmit = (e?: React.BaseSyntheticEvent) => {
         e?.preventDefault();
         if (selectedFiles.length === 0) return;
-        onAnalyze(selectedFiles, password || undefined);
+        handleAnalyze(selectedFiles, password || undefined);
     };
 
     return (
@@ -98,8 +101,8 @@ const UploadScreen = ({ onAnalyze, isLoading, errorMessage }: UploadScreenProps)
                         isCheckingPassword={isCheckingPassword}
                         isPasswordProtected={isPasswordProtected}
                         passwordInputRef={passwordInputRef}
-                        handleAnalyze={handleAnalyze}
-                        isLoading={isLoading}
+                        handleAnalyze={handleSubmit}
+                        isLoading={isParsing}
                         errorMessage={errorMessage}
                     />
                 </div>

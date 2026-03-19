@@ -5,13 +5,16 @@ import './index.css'
 import App from './App.tsx'
 import { ReduxProvider } from './shared/redux/provider.tsx';
 import { ClerkProvider } from '@clerk/react';
+import { ExpenseAnalysisProviders } from './components/providers/ExpenseAnalysisProvider.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ReduxProvider>
       <BrowserRouter>
         <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
-          <App />
+          <ExpenseAnalysisProviders>
+            <App />
+          </ExpenseAnalysisProviders>
         </ClerkProvider>
       </BrowserRouter>
     </ReduxProvider>

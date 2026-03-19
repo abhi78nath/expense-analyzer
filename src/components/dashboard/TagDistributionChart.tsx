@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import {
     PieChart,
     Pie,
@@ -44,6 +44,63 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null;
 };
 
+const ToggleButtons = ({ mode, setMode }: { mode: "Debit" | "Credit" | "Comparison"; setMode: (mode: "Debit" | "Credit" | "Comparison") => void }) => (
+    <TooltipProvider delayDuration={200}>
+        <div className="flex h-9 items-center rounded-xl border border-slate-700 bg-slate-900/50 p-1">
+            <UITooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={() => setMode("Debit")}
+                        className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Debit"
+                            ? "bg-slate-700 text-white shadow-sm"
+                            : "text-slate-500 hover:text-slate-300"
+                            }`}
+                    >
+                        <ArrowDownRight className="h-3.5 w-3.5" />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
+                    <p>Debit by Tag</p>
+                </TooltipContent>
+            </UITooltip>
+
+            <UITooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={() => setMode("Credit")}
+                        className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Credit"
+                            ? "bg-slate-700 text-white shadow-sm"
+                            : "text-slate-500 hover:text-slate-300"
+                            }`}
+                    >
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
+                    <p>Credit by Tag</p>
+                </TooltipContent>
+            </UITooltip>
+
+            <UITooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={() => setMode("Comparison")}
+                        className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Comparison"
+                            ? "bg-slate-700 text-white shadow-sm"
+                            : "text-slate-500 hover:text-slate-300"
+                            }`}
+                    >
+                        <Layers className="h-3.5 w-3.5" />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
+                    <p>Comparison by Tag</p>
+                </TooltipContent>
+            </UITooltip>
+        </div>
+    </TooltipProvider>
+);
+
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, displayName }: any) => {
     const radius = outerRadius * 1.2;
@@ -64,7 +121,14 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, d
     );
 };
 
-const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
+const MyCustomPie = (props: PieSectorShapeProps) => {
+    const { payload } = props;
+    const tag = (payload.displayName || payload.name.replace(" (Credit)", "")).toLowerCase();
+    const color = tagColors[tag] || tagColors["other"];
+    return <Sector {...props} fill={color} stroke="none" />;
+};
+
+const TagDistributionChart = memo(({ transactions }: TagDistributionChartProps) => {
     const [mode, setMode] = useState<"Debit" | "Credit" | "Comparison">("Debit");
 
     const { debitData, creditData } = useMemo(() => {
@@ -116,62 +180,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
             ? "Distribution of credits across categories"
             : "Inner: Credit | Outer: Debit";
 
-    const ToggleButtons = () => (
-        <TooltipProvider delayDuration={200}>
-            <div className="flex h-9 items-center rounded-xl border border-slate-700 bg-slate-900/50 p-1">
-                <UITooltip>
-                    <TooltipTrigger asChild>
-                        <button
-                            onClick={() => setMode("Debit")}
-                            className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Debit"
-                                ? "bg-slate-700 text-white shadow-sm"
-                                : "text-slate-500 hover:text-slate-300"
-                                }`}
-                        >
-                            <ArrowDownRight className="h-3.5 w-3.5" />
-                        </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
-                        <p>Debit by Tag</p>
-                    </TooltipContent>
-                </UITooltip>
 
-                <UITooltip>
-                    <TooltipTrigger asChild>
-                        <button
-                            onClick={() => setMode("Credit")}
-                            className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Credit"
-                                ? "bg-slate-700 text-white shadow-sm"
-                                : "text-slate-500 hover:text-slate-300"
-                                }`}
-                        >
-                            <ArrowUpRight className="h-3.5 w-3.5" />
-                        </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
-                        <p>Credit by Tag</p>
-                    </TooltipContent>
-                </UITooltip>
-
-                <UITooltip>
-                    <TooltipTrigger asChild>
-                        <button
-                            onClick={() => setMode("Comparison")}
-                            className={`flex h-full items-center gap-2 rounded-lg px-2.5 text-[10px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${mode === "Comparison"
-                                ? "bg-slate-700 text-white shadow-sm"
-                                : "text-slate-500 hover:text-slate-300"
-                                }`}
-                        >
-                            <Layers className="h-3.5 w-3.5" />
-                        </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-slate-900 border-slate-800 text-slate-200 text-xs px-2 py-1">
-                        <p>Comparison by Tag</p>
-                    </TooltipContent>
-                </UITooltip>
-            </div>
-        </TooltipProvider>
-    );
 
     if (!hasData) {
         return (
@@ -187,7 +196,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                         <h2 className="text-lg font-semibold text-white truncate">{title}</h2>
                         <p className="text-xs text-slate-500">{description}</p>
                     </div>
-                    <ToggleButtons />
+                    <ToggleButtons mode={mode} setMode={setMode} />
                 </div>
                 <div className="flex-1 flex flex-col justify-center items-center">
                     <p className="text-sm text-slate-500">No {mode === "Comparison" ? "data" : mode.toLowerCase() + " data"} available.</p>
@@ -196,12 +205,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
         );
     }
 
-    const MyCustomPie = (props: PieSectorShapeProps) => {
-        const { payload } = props;
-        const tag = (payload.displayName || payload.name.replace(" (Credit)", "")).toLowerCase();
-        const color = tagColors[tag] || tagColors["other"];
-        return <Sector {...props} fill={color} stroke="none" />;
-    };
+
 
     return (
         <div
@@ -217,7 +221,7 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
                     <h2 className="text-lg font-semibold text-white">{title}</h2>
                     <p className="text-xs text-slate-500">{description}</p>
                 </div>
-                <ToggleButtons />
+                <ToggleButtons mode={mode} setMode={setMode} />
             </div>
 
             <div className="flex-1 w-full min-h-[300px]">
@@ -277,6 +281,6 @@ const TagDistributionChart = ({ transactions }: TagDistributionChartProps) => {
             </div>
         </div>
     );
-};
+});
 
 export default TagDistributionChart;
