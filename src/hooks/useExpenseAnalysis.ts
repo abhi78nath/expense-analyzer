@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { pdfjs } from 'react-pdf';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
-import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, getAllTransactions, type StatementRecord, type TransactionRecord } from '../utils/db';
+import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, getAllTransactions, updateTransactionTag, type StatementRecord, type TransactionRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
 // At the top of useExpenseAnalysis.ts, before the hook
@@ -187,6 +187,34 @@ export const useExpenseAnalysis = () => {
         navigate('/');
     };
 
+    const handleUpdateTransactionTag = async (id: string, newTag: string) => {
+        const currentUserId = window.Clerk?.user?.id;
+        if (!currentUserId) return false;
+        try {
+            await updateTransactionTag(currentUserId, id, newTag);
+            setTransactionRows(prev => prev.map(t => t.id === id ? { ...t, tag: newTag } : t));
+            return true;
+        } catch (err) {
+            console.error("Failed to update tag:", err);
+            return false;
+        }
+    };
+
+    const handleBulkUpdateTransactionTags = async (updates: Record<string, string>) => {
+        const currentUserId = window.Clerk?.user?.id;
+        if (!currentUserId) return false;
+        try {
+            await Promise.all(
+                Object.entries(updates).map(([id, newTag]) => updateTransactionTag(currentUserId, id, newTag))
+            );
+            setTransactionRows(prev => prev.map(t => updates[t.id] !== undefined ? { ...t, tag: updates[t.id] } : t));
+            return true;
+        } catch (err) {
+            console.error("Failed to bulk update tags:", err);
+            return false;
+        }
+    };
+
     return {
         transactionRows,
         uploadedFiles,
@@ -194,7 +222,9 @@ export const useExpenseAnalysis = () => {
         errorMessage,
         handleAnalyze,
         handleBackToUpload,
-        loadOfflineData
+        loadOfflineData,
+        handleUpdateTransactionTag,
+        handleBulkUpdateTransactionTags
     };
 };
 
