@@ -9,7 +9,9 @@ import {
     Search,
     X,
     Check,
-    X as XIcon
+    X as XIcon,
+    Maximize2,
+    Minimize2
 } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import {
@@ -45,6 +47,8 @@ import { getTransactionTags } from "@/utils/api";
 
 interface RecentTransactionsProps {
     transactions: TransactionRow[];
+    isMaximized?: boolean;
+    onToggleMaximize?: () => void;
 }
 
 type SortColumn = "date" | "amount";
@@ -58,7 +62,7 @@ const parseTxnDate = (dateStr: string) => {
     return new Date(2000 + Number(year), Number(month) - 1, Number(day));
 };
 
-const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+const RecentTransactions = ({ transactions, isMaximized, onToggleMaximize }: RecentTransactionsProps) => {
     const { handleUpdateTransactionTag, handleBulkUpdateTransactionTags } = useExpenseAnalysisContext();
     const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>(null);
@@ -209,6 +213,16 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                 </div>
 
                 <div className="flex items-center gap-2 relative w-full md:w-auto">
+                    {onToggleMaximize && (
+                        <button
+                            onClick={onToggleMaximize}
+                            className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors flex items-center gap-1.5 border border-slate-700"
+                            title={isMaximized ? "Restore" : "Maximize"}
+                        >
+                            {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                            <span className="hidden sm:inline">{isMaximized ? "Restore" : "Maximize"}</span>
+                        </button>
+                    )}
                     {Object.keys(pendingTags).length > 0 && (
                         <>
                             <button
@@ -246,7 +260,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                 </div>
             </div>
 
-            <ScrollArea className="h-[400px] w-full rounded-md border border-slate-800/50">
+            <ScrollArea className={`w-full rounded-md border border-slate-800/50 ${isMaximized ? "h-[calc(100vh-280px)] min-h-[400px]" : "h-[400px]"}`}>
                 <Table>
                     <TableHeader className="bg-slate-900 sticky top-0 z-10">
                         <TableRow className="hover:bg-transparent border-slate-800">
