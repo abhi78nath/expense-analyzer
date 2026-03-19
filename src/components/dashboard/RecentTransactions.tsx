@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -7,7 +7,9 @@ import {
     ChevronsUpDown,
     Filter,
     Search,
-    X
+    X,
+    Check,
+    X as XIcon
 } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import {
@@ -38,6 +40,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { tagColors } from "@/lib/tagColors";
 import { capitalize, getContrastColor } from "@/utils/colorUtils";
+import { useExpenseAnalysisContext } from "@/components/providers/ExpenseAnalysisProvider";
+import { getTransactionTags } from "@/utils/api";
 
 interface RecentTransactionsProps {
     transactions: TransactionRow[];
@@ -55,10 +59,26 @@ const parseTxnDate = (dateStr: string) => {
 };
 
 const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+    const { handleUpdateTransactionTag, handleBulkUpdateTransactionTags } = useExpenseAnalysisContext();
     const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [pendingTags, setPendingTags] = useState<Record<string, string>>({});
+    const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+    const [popoverInput, setPopoverInput] = useState("");
+    const [defaultApiTags, setDefaultApiTags] = useState<string[]>([]);
+
+    useEffect(() => {
+        getTransactionTags()
+            .then((data: any) => {
+                if (Array.isArray(data)) {
+                    const extracted = Array.from(new Set(data.map((d: any) => d.tag?.toLowerCase()).filter(Boolean)));
+                    setDefaultApiTags(extracted as string[]);
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     // Extract unique tags and sort them
     const uniqueTags = useMemo(() => {
@@ -138,6 +158,33 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
         return sortOrder === "asc" ? <ChevronUp className="ml-1 h-3 w-3 text-teal-400" /> : <ChevronDown className="ml-1 h-3 w-3 text-teal-400" />;
     };
 
+    const confirmPendingTag = (id: string) => {
+        if (pendingTags[id] === undefined) return;
+        handleUpdateTransactionTag(id, pendingTags[id]);
+        setPendingTags(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    };
+
+    const rejectPendingTag = (id: string) => {
+        setPendingTags(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    };
+
+    const handleBulkConfirm = async () => {
+        await handleBulkUpdateTransactionTags(pendingTags);
+        setPendingTags({});
+    };
+
+    const handleBulkReset = () => {
+        setPendingTags({});
+    };
+
     if (transactions.length === 0) {
         return null;
     }
@@ -161,23 +208,41 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                     </p>
                 </div>
 
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                    <Input
-                        placeholder="Search description or ref..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 pr-9 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 text-xs h-9 focus:ring-teal-500/20 focus:border-teal-500"
-                    />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors"
-                            aria-label="Clear search"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </button>
+                <div className="flex items-center gap-2 relative w-full md:w-auto">
+                    {Object.keys(pendingTags).length > 0 && (
+                        <>
+                            <button
+                                onClick={handleBulkConfirm}
+                                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-500/20 text-teal-400 hover:bg-teal-500/30 transition-colors"
+                            >
+                                Confirm All
+                            </button>
+                            <button
+                                onClick={handleBulkReset}
+                                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-colors"
+                            >
+                                Reset All
+                            </button>
+                        </>
                     )}
+                    <div className="relative w-full md:w-72">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                        <Input
+                            placeholder="Search description or ref..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 pr-9 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 text-xs h-9 focus:ring-teal-500/20 focus:border-teal-500"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -314,26 +379,118 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {t.tag ? (
-                                            (() => {
-                                                const bgColor = tagColors[t.tag.toLowerCase()] || tagColors["other"];
-                                                const textColor = getContrastColor(bgColor);
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            {(() => {
+                                                const hasPending = pendingTags[t.id] !== undefined;
+                                                const displayedTag = hasPending ? pendingTags[t.id] : t.tag;
+
+                                                let tagContent;
+                                                if (displayedTag) {
+                                                    const bgColor = tagColors[displayedTag.toLowerCase()] || tagColors["other"];
+                                                    const textColor = getContrastColor(bgColor);
+                                                    tagContent = (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="border-none text-xs font-normal px-2 py-0 cursor-pointer hover:opacity-80 transition-opacity"
+                                                            style={{
+                                                                backgroundColor: bgColor,
+                                                                color: textColor
+                                                            }}
+                                                        >
+                                                            {capitalize(displayedTag)}
+                                                        </Badge>
+                                                    );
+                                                } else {
+                                                    tagContent = <span className="text-sm text-slate-500 font-mono cursor-pointer hover:text-slate-300 transition-colors">-</span>;
+                                                }
+
                                                 return (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="border-none text-xs font-normal px-2 py-0"
-                                                        style={{
-                                                            backgroundColor: bgColor,
-                                                            color: textColor
-                                                        }}
-                                                    >
-                                                        {capitalize(t.tag)}
-                                                    </Badge>
+                                                    <>
+                                                        <Popover
+                                                            open={openPopoverId === t.id}
+                                                            onOpenChange={(isOpen) => {
+                                                                if (isOpen) {
+                                                                    setPopoverInput(displayedTag || "");
+                                                                    setOpenPopoverId(t.id);
+                                                                } else {
+                                                                    setOpenPopoverId(null);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <PopoverTrigger asChild>
+                                                                {tagContent}
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-56 p-2 bg-slate-900 border-slate-800" align="center">
+                                                                <div className="flex flex-col gap-2">
+                                                                    <p className="text-xs font-medium text-slate-300">Edit Tag</p>
+                                                                    <Input
+                                                                        autoFocus
+                                                                        value={popoverInput}
+                                                                        onChange={(e) => setPopoverInput(e.target.value)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === "Enter") {
+                                                                                setPendingTags(prev => ({ ...prev, [t.id]: popoverInput.trim() || "other" }));
+                                                                                setOpenPopoverId(null);
+                                                                            }
+                                                                        }}
+                                                                        placeholder="Type tag name..."
+                                                                        className="h-8 text-xs bg-slate-800 border-slate-700 text-white"
+                                                                    />
+                                                                    <div className="max-h-[120px] overflow-y-auto mt-1 flex flex-col gap-0.5 custom-scrollbar bg-slate-900 border border-slate-800 rounded-md">
+                                                                        {Array.from(new Set([...defaultApiTags, ...uniqueTags]))
+                                                                            .filter(tag => tag.includes(popoverInput.toLowerCase().trim()))
+                                                                            .sort()
+                                                                            .map(tag => (
+                                                                                <div
+                                                                                    key={tag}
+                                                                                    onClick={() => {
+                                                                                        setPendingTags(prev => ({ ...prev, [t.id]: tag }));
+                                                                                        setOpenPopoverId(null);
+                                                                                    }}
+                                                                                    className="px-2 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors"
+                                                                                >
+                                                                                    {capitalize(tag)}
+                                                                                </div>
+                                                                            ))
+                                                                        }
+                                                                    </div>
+                                                                    <div className="flex justify-between items-center mt-1">
+                                                                        <span className="text-[10px] text-slate-500">Press enter to save locally</span>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setPendingTags(prev => ({ ...prev, [t.id]: popoverInput.trim() || "other" }));
+                                                                                setOpenPopoverId(null);
+                                                                            }}
+                                                                            className="px-2 py-1 text-xs bg-teal-500 hover:bg-teal-400 text-white rounded transition-colors"
+                                                                        >
+                                                                            Apply
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        {hasPending && (
+                                                            <div className="flex items-center gap-1 opacity-80 pl-1">
+                                                                <button
+                                                                    onClick={() => confirmPendingTag(t.id)}
+                                                                    className="p-0.5 rounded-full hover:bg-teal-500/20 text-teal-400 transition-colors"
+                                                                    title="Confirm edit"
+                                                                >
+                                                                    <Check className="h-3 w-3" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => rejectPendingTag(t.id)}
+                                                                    className="p-0.5 rounded-full hover:bg-rose-500/20 text-rose-400 transition-colors"
+                                                                    title="Discard edit"
+                                                                >
+                                                                    <XIcon className="h-3 w-3" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 );
-                                            })()
-                                        ) : (
-                                            <span className="text-sm text-slate-500 font-mono">-</span>
-                                        )}
+                                            })()}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             );

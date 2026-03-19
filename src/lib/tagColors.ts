@@ -52,6 +52,8 @@ export const tagColors: Record<string, string> = {
     "credit card payment": "#78909C",
     "investments": "#546E7A",
     "taxes": "#455A64",
+    "self transfer": "#9575CD",  // soft purple (distinct but neutral)
+    "lend": "#64B5F6",  // soft blue (financial, calm, distinct from expenses)
 
     // Entertainment
     "movies": "#FF7043",           // red-orange
@@ -72,6 +74,7 @@ export const tagColors: Record<string, string> = {
     // Roofing (new)
     "roofing": "#8B4513",          // saddle brown / earthy brown
     "labour": "#FFB300",      // amber / construction yellow
+    "construction": "#A1887F",  // warm cement brown/grey
 
     // Others
     "other": "#BDBDBD",
