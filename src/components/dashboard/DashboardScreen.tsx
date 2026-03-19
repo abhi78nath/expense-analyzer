@@ -14,6 +14,7 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import { setDateRange } from "@/shared/redux/features";
 import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider";
 import { useNavigate } from "react-router-dom";
+import { Maximize2, BarChart2 } from "lucide-react";
 
 interface DashboardScreenProps {
     transactions: TransactionRow[];
@@ -32,6 +33,7 @@ const DashboardScreen = memo(() => {
 
     const { isLoaded, isSignedIn, userId } = useAuth();
     const [isCheckingData, setIsCheckingData] = useState(true);
+    const [isTransactionsMaximized, setIsTransactionsMaximized] = useState(false);
 
     useEffect(() => {
         const initData = async () => {
@@ -128,15 +130,35 @@ const DashboardScreen = memo(() => {
                     uploadedFiles={uploadedFiles}
                 />
                 <BalanceCardsRow transactions={filteredTransactions} />
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div className="lg:col-span-2">
-                        <CreditsDebitsChart transactions={filteredTransactions} />
+                {!isTransactionsMaximized ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div className="lg:col-span-2">
+                            <CreditsDebitsChart transactions={filteredTransactions} />
+                        </div>
+                        <div className="lg:col-span-1">
+                            <TagDistributionChart transactions={stableTransactions} />
+                        </div>
                     </div>
-                    <div className="lg:col-span-1">
-                        <TagDistributionChart transactions={stableTransactions} />
+                ) : (
+                    <div className="flex bg-slate-800/50 border border-slate-700/60 rounded-2xl items-center justify-between px-6 py-3 mb-6 transition-all">
+                        <div className="flex items-center gap-3">
+                            <BarChart2 className="h-5 w-5 text-teal-400" />
+                            <span className="text-slate-300 font-medium text-sm">Charts Collapsed</span>
+                        </div>
+                        <button
+                            onClick={() => setIsTransactionsMaximized(false)}
+                            className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-white transition-colors flex items-center gap-2"
+                        >
+                            <Maximize2 className="h-3.5 w-3.5" />
+                            Maximize Charts
+                        </button>
                     </div>
-                </div>
-                <RecentTransactions transactions={filteredTransactions} />
+                )}
+                <RecentTransactions
+                    transactions={filteredTransactions}
+                    isMaximized={isTransactionsMaximized}
+                    onToggleMaximize={() => setIsTransactionsMaximized(!isTransactionsMaximized)}
+                />
             </DashboardLayout>
         </SidebarProvider>
     );
