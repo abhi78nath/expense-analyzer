@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="5" y="6" width="56" height="56" rx="100" fill="url(#grad)" />
+
+  <!-- Bar Chart Icon (scaled and centered) -->
+  <g stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(16,16) scale(1.5)">
+    <path d="M3 3v18h18"/>
+    <path d="M18 17V9"/>
+    <path d="M13 17V5"/>
+    <path d="M8 17v-3"/>
+  </g>
+</svg>
