@@ -8,11 +8,11 @@ import UploadForm from "./UploadForm";
 import Navbar from "../layout/Navbar";
 import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider";
 
-interface UploadScreenProps {
-    onAnalyze: (files: File[], password?: string) => void;
-    isLoading: boolean;
-    errorMessage?: string;
-}
+// interface UploadScreenProps {
+//     onAnalyze: (files: File[], password?: string) => void;
+//     isLoading: boolean;
+//     errorMessage?: string;
+// }
 
 const UploadScreen = () => {
 

@@ -1,6 +1,5 @@
 import { SignIn, SignUp } from "@clerk/react";
 import AnimatedBackground from "../upload/AnimatedBackground";
-import Navbar from "../layout/Navbar";
 import { BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 

@@ -1,6 +1,6 @@
 import './App.css';
 import { pdfjs } from 'react-pdf';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import UploadScreen from './components/upload/UploadScreen';
 import DashboardScreen from './components/dashboard/DashboardScreen';
 import SettingsScreen from './components/settings/SettingsScreen';

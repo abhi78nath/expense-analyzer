@@ -11,7 +11,7 @@ import {
     AreaChart,
     Area,
 } from "recharts";
-import { ChartBarBig, LayoutGrid, TrendingUp } from "lucide-react";
+import { ChartBarBig, TrendingUp } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import {
     Tooltip as UITooltip,

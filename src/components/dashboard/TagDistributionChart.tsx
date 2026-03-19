@@ -11,7 +11,6 @@ import { ArrowDownRight, ArrowUpRight, Layers } from "lucide-react";
 import type { TransactionRow } from "@/utils/textParser";
 import { tagColors } from "@/lib/tagColors";
 import { capitalize } from "@/utils/colorUtils";
-import { Button } from "@/components/ui/button";
 import {
     Tooltip as UITooltip,
     TooltipContent,

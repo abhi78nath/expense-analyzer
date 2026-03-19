@@ -5,7 +5,6 @@ import BalanceCardsRow from "./BalanceCardsRow";
 import CreditsDebitsChart from "./CreditsDebitsChart";
 import TagDistributionChart from "./TagDistributionChart";
 import RecentTransactions from "./RecentTransactions";
-import type { TransactionRow } from "@/utils/textParser";
 import type { RootState } from "@/shared/redux/store";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useMemo, useEffect, memo } from "react";
@@ -16,14 +15,14 @@ import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider"
 import { useNavigate } from "react-router-dom";
 import { Maximize2, BarChart2 } from "lucide-react";
 
-interface DashboardScreenProps {
-    transactions: TransactionRow[];
-    uploadedFiles: File[];
-    onBackToUpload?: () => void;
-    onAnalyze: (files: File[], password?: string, isAppend?: boolean) => Promise<boolean>;
-    isParsing: boolean;
-    errorMessage?: string;
-}
+// interface DashboardScreenProps {
+//     transactions: TransactionRow[];
+//     uploadedFiles: File[];
+//     onBackToUpload?: () => void;
+//     onAnalyze: (files: File[], password?: string, isAppend?: boolean) => Promise<boolean>;
+//     isParsing: boolean;
+//     errorMessage?: string;
+// }
 
 const DashboardScreen = memo(() => {
     const { transactionRows: transactions, uploadedFiles, handleAnalyze, isParsing, errorMessage, handleBackToUpload, loadOfflineData } = useExpenseAnalysisContext();
