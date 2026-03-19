@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { pdfjs } from 'react-pdf';
-import { useAuth } from '@clerk/react';
 import { setDateRange } from '../shared/redux/features';
 import { parsePdfWithPython } from '../utils/api';
-import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, type StatementRecord, type TransactionRecord } from '../utils/db';
+import { findDuplicateStatement, mapToTransactionRecord, saveStatementRecord, saveTransactions, getAllTransactions, type StatementRecord, type TransactionRecord } from '../utils/db';
 import type { TransactionRow } from '../utils/textParser';
 
 // At the top of useExpenseAnalysis.ts, before the hook
@@ -25,6 +24,32 @@ export const useExpenseAnalysis = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const loadOfflineData = useCallback(async (currentUserId: string) => {
+        try {
+            const dbTxns = await getAllTransactions(currentUserId);
+            if (dbTxns && dbTxns.length > 0) {
+                const mapped: TransactionRow[] = dbTxns.map(t => ({
+                    id: t.id,
+                    date: (() => {
+                        // Convert YYYY-MM-DD back to DD-MM-YY
+                        const [yyyy, mm, dd] = t.date.split("-");
+                        return `${dd}-${mm}-${yyyy.slice(2)}`;
+                    })(),
+                    transactionReference: t.description,
+                    refNoOrChqNo: "",
+                    credit: t.type === "credit" ? t.amount : null,
+                    debit: t.type === "debit" ? t.amount : null,
+                    balance: t.balance,
+                    tag: t.tag || "other"
+                }));
+                setTransactionRows(mapped);
+                return true;
+            }
+        } catch (err) {
+            console.error("Error loading offline data", err);
+        }
+        return false;
+    }, []);
 
     const handleAnalyze = async (files: File[], password?: string, isAppend: boolean = false) => {
         const currentUserId = window.Clerk?.user?.id ?? null;
@@ -61,6 +86,7 @@ export const useExpenseAnalysis = () => {
             const response = await parsePdfWithPython(files, currentUserId, password);
 
             const rows: TransactionRow[] = response.transactions.map((t: any) => ({
+                id: t.id || crypto.randomUUID(),
                 date: String(t["date"] || ""),
                 transactionReference: String(t["transaction reference"] || ""),
                 refNoOrChqNo: String(t["ref.no/chq.no"] || ""),
@@ -167,7 +193,8 @@ export const useExpenseAnalysis = () => {
         isParsing,
         errorMessage,
         handleAnalyze,
-        handleBackToUpload
+        handleBackToUpload,
+        loadOfflineData
     };
 };
 

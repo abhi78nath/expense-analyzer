@@ -10,6 +10,7 @@ export interface TextItem {
 }
 
 export interface TransactionRow {
+  id: string;
   date: string;
   transactionReference: string;
   refNoOrChqNo: string;
@@ -153,6 +154,7 @@ export const mapRowToObject = (row: TextItem[]): TransactionRow | null => {
   }
 
   return {
+    id: crypto.randomUUID(),
     date,
     transactionReference,
     refNoOrChqNo,

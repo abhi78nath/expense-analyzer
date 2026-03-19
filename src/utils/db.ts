@@ -51,6 +51,7 @@ export interface DashboardSummary {
 }
 
 export interface BackendTransaction {
+    id: string;
     date: string;        // "DD-MM-YY"
     "transaction reference": string;
     "ref.no/chq.no": string;
@@ -67,11 +68,13 @@ export interface BackendTransaction {
 // initDB() is called once. Every helper re-uses the same connection.
 
 let _db: IDBDatabase | null = null;
+let _initPromise: Promise<IDBDatabase> | null = null;
 
 export function initDB(): Promise<IDBDatabase> {
     if (_db) return Promise.resolve(_db);
+    if (_initPromise) return _initPromise;
 
-    return new Promise((resolve, reject) => {
+    _initPromise = new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
 
         req.onupgradeneeded = (event) => {
@@ -101,8 +104,6 @@ export function initDB(): Promise<IDBDatabase> {
                 ruleStore.createIndex("by_user", "userId", { unique: false });
                 ruleStore.createIndex("by_user_tag", ["userId", "tag"], { unique: false });
             }
-
-            // if (oldVersion < 3) { ... future migrations here }
         };
 
         req.onsuccess = () => {
@@ -111,15 +112,29 @@ export function initDB(): Promise<IDBDatabase> {
             _db.onversionchange = () => {
                 _db?.close();
                 _db = null;
+                _initPromise = null;
                 console.warn("[db] Connection closed — another tab triggered a migration. Reload to reconnect.");
+            };
+
+            _db.onclose = () => {
+                _db = null;
+                _initPromise = null;
             };
 
             resolve(_db);
         };
 
-        req.onerror = () => reject(req.error);
-        req.onblocked = () => console.warn("[db] DB open blocked — close other tabs and retry.");
+        req.onerror = () => {
+            _initPromise = null;
+            reject(req.error);
+        };
+
+        req.onblocked = () => {
+            console.warn("[db] DB open blocked — close other tabs and retry.");
+        };
     });
+
+    return _initPromise;
 }
 
 // ─── Generic helpers ──────────────────────────────────────────
@@ -448,7 +463,7 @@ export function mapToTransactionRecord(
     statementId: string
 ): TransactionRecord {
     return {
-        id: crypto.randomUUID(),
+        id: raw.id,
         userId,
         statementId,
         date: parseDateToISO(raw.date),

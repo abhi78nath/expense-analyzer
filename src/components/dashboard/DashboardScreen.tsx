@@ -8,7 +8,8 @@ import RecentTransactions from "./RecentTransactions";
 import type { TransactionRow } from "@/utils/textParser";
 import type { RootState } from "@/shared/redux/store";
 import { useSelector, useDispatch } from "react-redux";
-import { useMemo, useEffect, memo } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
+import { useAuth } from "@clerk/react";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { setDateRange } from "@/shared/redux/features";
 import { useExpenseAnalysisContext } from "../providers/ExpenseAnalysisProvider";
@@ -24,16 +25,30 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen = memo(() => {
-    const { transactionRows: transactions, uploadedFiles, handleAnalyze, isParsing, errorMessage, handleBackToUpload } = useExpenseAnalysisContext();
+    const { transactionRows: transactions, uploadedFiles, handleAnalyze, isParsing, errorMessage, handleBackToUpload, loadOfflineData } = useExpenseAnalysisContext();
     const dateRange = useSelector((state: RootState) => state.dateRange.dateRange);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const { isLoaded, isSignedIn, userId } = useAuth();
+    const [isCheckingData, setIsCheckingData] = useState(true);
+
     useEffect(() => {
-        if (location.pathname === '/dashboard' && transactions.length === 0) {
-            navigate('/', { replace: true });
-        }
-    }, [location.pathname, transactions.length, navigate]);
+        const initData = async () => {
+            if (isLoaded && isSignedIn && userId && transactions.length === 0) {
+                const hasData = await loadOfflineData(userId);
+                if (!hasData) {
+                    navigate('/', { replace: true });
+                }
+            } else if (isLoaded && !isSignedIn && transactions.length === 0) {
+                navigate('/', { replace: true });
+            }
+            if (isLoaded) {
+                setIsCheckingData(false);
+            }
+        };
+        initData();
+    }, [isLoaded, isSignedIn, userId, transactions.length, navigate, loadOfflineData]);
 
     useEffect(() => {
         // Initialize or expand date range if we have transactions
@@ -96,6 +111,10 @@ const DashboardScreen = memo(() => {
     }, [dateRange, transactions]);
 
     const stableTransactions = useMemo(() => filteredTransactions, [filteredTransactions]);
+
+    if (isCheckingData) {
+        return <div className="flex h-screen w-full items-center justify-center font-semibold text-slate-400">Loading your dashboard...</div>;
+    }
 
     console.log(filteredTransactions, 'filteredTransactions')
     return (
